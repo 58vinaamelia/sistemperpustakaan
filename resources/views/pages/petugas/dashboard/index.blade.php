@@ -80,36 +80,64 @@
                         <td>{{ $item->buku->judul ?? '-' }}</td>
                         <td>{{ $item->tanggal_pinjam }}</td>
                         <td>{{ $item->tanggal_jatuh_tempo }}</td>
+
+                        <!-- STATUS (SUDAH FIX) -->
                         <td>
                             @php
-                                if (!empty($item->tanggal_kembali)) {
-                                    $status = 'Dikembalikan';
-                                    $bgColor = 'bg-green-100';
-                                    $textColor = 'text-green-600';
-                                } elseif (\Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($item->tanggal_jatuh_tempo))) {
-                                    $status = 'Terlambat';
-                                    $bgColor = 'bg-yellow-100';
-                                    $textColor = 'text-yellow-600';
-                                } else {
-                                    $status = 'Dipinjam';
-                                    $bgColor = 'bg-red-100';
-                                    $textColor = 'text-red-600';
+                                $status = strtolower(trim($item->status ?? ''));
+
+                                if ($status === '' || $status === null) {
+                                    $status = 'pending';
+                                }
+
+                                switch ($status) {
+                                    case 'pending':
+                                        $label = 'Pending';
+                                        $bgColor = 'bg-orange-100';
+                                        $textColor = 'text-orange-600';
+                                        break;
+
+                                    case 'dipinjam':
+                                        $label = 'Dipinjam';
+                                        $bgColor = 'bg-blue-100';
+                                        $textColor = 'text-blue-600';
+                                        break;
+
+                                    case 'ditolak':
+                                        $label = 'Ditolak';
+                                        $bgColor = 'bg-red-100';
+                                        $textColor = 'text-red-600';
+                                        break;
+
+                                    case 'selesai':
+                                        $label = 'Selesai';
+                                        $bgColor = 'bg-green-100';
+                                        $textColor = 'text-green-600';
+                                        break;
+
+                                    case 'telat':
+                                        $label = 'Telat';
+                                        $bgColor = 'bg-yellow-100';
+                                        $textColor = 'text-yellow-600';
+                                        break;
+
+                                    default:
+                                        $label = ucfirst($item->status ?? 'Tidak diketahui');
+                                        $bgColor = 'bg-gray-100';
+                                        $textColor = 'text-gray-600';
+                                        break;
                                 }
                             @endphp
+
                             <span class="{{ $bgColor }} {{ $textColor }} px-3 py-1 rounded-full text-xs">
-                                {{ $status }}
+                                {{ $label }}
                             </span>
                         </td>
 
-                        <!-- KOLOM AKSI -->
+                        <!-- AKSI (TIDAK DIUBAH) -->
                         <td class="py-2">
                             <div class="flex justify-center items-center gap-2">
-                                <!-- DETAIL -->
-                                <a href="{{ route('petugas.peminjaman.show', $item->id) }}"
-                                   class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 text-xs rounded transition">
-                                   Detail
-                                </a>
-
+                            
                                 <!-- DELETE -->
                                 <form action="{{ route('petugas.peminjaman.destroy', $item->id) }}"
                                       method="POST"
@@ -134,7 +162,7 @@
             </table>
         </div>
 
-        <!-- PAGINASI BAWAH TABEL -->
+        <!-- PAGINASI -->
         <div class="mt-4 flex justify-between">
             @if ($peminjaman->onFirstPage())
                 <span class="px-4 py-2 text-gray-400 border rounded cursor-not-allowed">« Previous</span>
@@ -152,7 +180,7 @@
 
 </div>
 
-<!-- SCRIPT SEARCH OTOMATIS -->
+<!-- SCRIPT SEARCH -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     let input = document.querySelector('input[name="search"]');

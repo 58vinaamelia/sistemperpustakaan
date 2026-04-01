@@ -32,9 +32,9 @@
         <nav class="px-6 mt-4">
             <ul class="space-y-0 text-sm">
 
-                {{-- PETUGAS --}}
                 @if(Auth::user()->role == 'petugas')
 
+                <!-- DASHBOARD -->
                 <li>
                     <a href="/petugas/dashboard"
                        class="flex items-center gap-3 px-2 py-1.5 text-gray-500 font-medium transition
@@ -44,6 +44,27 @@
                     </a>
                 </li>
 
+                <!-- LAPORAN -->
+                <li>
+                    <a href="/petugas/laporan"
+                       class="flex items-center gap-3 px-2 py-1.5 text-gray-500 font-medium transition
+                       {{ request()->is('petugas/laporan*') ? 'text-gray-800 font-semibold' : 'hover:text-gray-800' }}">
+                        <i class="ti ti-file-report text-lg"></i>
+                        Laporan
+                    </a>
+                </li>
+
+                <!-- TAMBAH PETUGAS -->
+                <li>
+                    <a href="/petugas/petugas/create"
+                       class="flex items-center gap-3 px-2 py-1.5 text-gray-500 font-medium transition
+                       {{ request()->is('petugas/petugas/create') ? 'text-gray-800 font-semibold' : 'hover:text-gray-800' }}">
+                        <i class="ti ti-user-plus text-lg"></i>
+                        Tambah Petugas
+                    </a>
+                </li>
+
+                <!-- DATA BUKU -->
                 <li>
                     <a href="/petugas/buku"
                        class="flex items-center gap-3 px-2 py-1.5 text-gray-500 font-medium transition
@@ -52,25 +73,6 @@
                         Data Buku
                     </a>
                 </li>
-
-                <li>
-                    <a href="/petugas/peminjaman"
-                       class="flex items-center gap-3 px-2 py-1.5 text-gray-500 font-medium transition
-                       {{ request()->is('petugas/peminjaman*') ? 'text-gray-800 font-semibold' : 'hover:text-gray-800' }}">
-                        <i class="ti ti-briefcase text-lg"></i>
-                        Data Peminjam
-                    </a>
-                </li>
-
-                <li>
-                    <a href="/petugas/anggota"
-                       class="flex items-center gap-3 px-2 py-1.5 text-gray-500 font-medium transition
-                       {{ request()->is('petugas/anggota*') ? 'text-gray-800 font-semibold' : 'hover:text-gray-800' }}">
-                        <i class="ti ti-users text-lg"></i>
-                        Data Anggota
-                    </a>
-                </li>
-
 
                 @endif
 

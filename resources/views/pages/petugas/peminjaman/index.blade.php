@@ -35,11 +35,9 @@
 
             @forelse($peminjaman as $item)
                 @php
-                    // 🔥 FIX UTAMA DI SINI
-                    $status = strtolower(trim($item->status ?? 'pending'));
+                    $status = strtolower(trim($item->status ?? ''));
 
-                    // 🔥 kalau kosong tetap dianggap pending
-                    if ($status == '' || is_null($item->status)) {
+                    if ($status === '' || $status === null) {
                         $status = 'pending';
                     }
                 @endphp
@@ -53,52 +51,69 @@
 
                     {{-- STATUS --}}
                     <td>
-                        @if($status == 'pending')
-                            <span style="background:orange; color:white; padding:5px 10px; border-radius:5px;">
-                                Pending
-                            </span>
+                        @switch($status)
 
-                        @elseif($status == 'dipinjam')
-                            <span style="background:green; color:white; padding:5px 10px; border-radius:5px;">
-                                Dipinjam
-                            </span>
+                            @case('pending')
+                                <span style="background:orange; color:white; padding:5px 10px; border-radius:5px;">
+                                    Pending
+                                </span>
+                                @break
 
-                        @elseif($status == 'ditolak')
-                            <span style="background:red; color:white; padding:5px 10px; border-radius:5px;">
-                                Ditolak
-                            </span>
+                            @case('dipinjam')
+                                <span style="background:green; color:white; padding:5px 10px; border-radius:5px;">
+                                    Dipinjam
+                                </span>
+                                @break
 
-                        @elseif($status == 'selesai')
-                            <span style="background:blue; color:white; padding:5px 10px; border-radius:5px;">
-                                Selesai
-                            </span>
+                            @case('ditolak')
+                                <span style="background:red; color:white; padding:5px 10px; border-radius:5px;">
+                                    Ditolak
+                                </span>
+                                @break
 
-                        @elseif($status == 'telat')
-                            <span style="background:black; color:white; padding:5px 10px; border-radius:5px;">
-                                Telat
-                            </span>
-                        @endif
+                            @case('selesai')
+                                <span style="background:blue; color:white; padding:5px 10px; border-radius:5px;">
+                                    Selesai
+                                </span>
+                                @break
+
+                            @case('telat')
+                                <span style="background:black; color:white; padding:5px 10px; border-radius:5px;">
+                                    Telat
+                                </span>
+                                @break
+
+                            @default
+                                <span style="background:gray; color:white; padding:5px 10px; border-radius:5px;">
+                                    {{ ucfirst($item->status ?? 'tidak diketahui') }}
+                                </span>
+
+                        @endswitch
                     </td>
 
                     {{-- AKSI --}}
                     <td>
-    @if($status == 'pending')
-        <form action="{{ route('petugas.peminjaman.konfirmasi', $item->id) }}" method="POST" style="display:inline;">
-            @csrf
-            <button type="submit" style="background:#16a34a; color:white; padding:6px 12px; border:none; border-radius:6px;">
-                ✔ Konfirmasi
-            </button>
-        </form>
-        <form action="{{ route('petugas.peminjaman.tolak', $item->id) }}" method="POST" style="display:inline;">
-            @csrf
-            <button type="submit" style="background:#dc2626; color:white; padding:6px 12px; border:none; border-radius:6px;">
-                ✖ Tolak
-            </button>
-        </form>
-    @else
-        <span style="color:gray; font-style:italic;">Sudah diproses</span>
-    @endif
-</td>
+
+                        @if($status == 'pending')
+                            <form action="{{ route('petugas.peminjaman.konfirmasi', $item->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                <button type="submit" style="background:#16a34a; color:white; padding:6px 12px; border:none; border-radius:6px;">
+                                    ✔ Konfirmasi
+                                </button>
+                            </form>
+
+                            <form action="{{ route('petugas.peminjaman.tolak', $item->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                <button type="submit" style="background:#dc2626; color:white; padding:6px 12px; border:none; border-radius:6px;">
+                                    ✖ Tolak
+                                </button>
+                            </form>
+
+                        @else
+                            <span style="color:gray; font-style:italic;">Sudah diproses</span>
+                        @endif
+
+                    </td>
 
                 </tr>
 

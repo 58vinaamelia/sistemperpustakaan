@@ -42,7 +42,7 @@
         <!-- TAHUN TERBIT (WAJIB) -->
         <div class="mb-3">
             <label>Tahun Terbit</label>
-            <input type="number" name="tahun_terbit" class="form-control"
+            <input type="number" name="tahun" class="form-control"
                    value="{{ old('tahun_terbit', $buku->tahun_terbit) }}">
         </div>
 

@@ -13,6 +13,9 @@ return new class extends Migration
             $table->string('nama');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('alamat')->nullable();
+            $table->string('telepon')->nullable();
+            $table->timestamps(); // created_at & updated_at otomatis
         });
     }
 

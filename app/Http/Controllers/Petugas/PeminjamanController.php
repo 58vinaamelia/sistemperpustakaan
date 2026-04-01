@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Petugas;
 
 use App\Models\Anggota\Pinjambuku;
+use Illuminate\Routing\Controller;
 
-class PeminjamanController extends \Illuminate\Routing\Controller
+class PeminjamanController extends Controller
 {
     /**
      * 📋 LIST DATA
      */
     public function index()
     {
-        $peminjaman = Pinjambuku::with(['user','buku'])
+        $peminjaman = Pinjambuku::with(['user', 'buku'])
                         ->latest()
                         ->paginate(10);
 
@@ -23,7 +24,7 @@ class PeminjamanController extends \Illuminate\Routing\Controller
      */
     public function show($id)
     {
-        $item = Pinjambuku::with(['user','buku'])->findOrFail($id);
+        $item = Pinjambuku::with(['user', 'buku'])->findOrFail($id);
         return view('pages.petugas.peminjaman.show', compact('item'));
     }
 
@@ -34,21 +35,22 @@ class PeminjamanController extends \Illuminate\Routing\Controller
     {
         $pinjam = Pinjambuku::with('buku')->findOrFail($id);
 
-        // 🔥 FIX: kalau status kosong → jadi pending
+        // default status
         if (empty($pinjam->status)) {
             $pinjam->status = 'pending';
         }
 
-        // 🔥 hanya bisa diproses kalau pending
-        if ($pinjam->status != 'pending') {
+        // hanya pending
+        if ($pinjam->status !== 'pending') {
             return back()->with('success', 'Sudah diproses');
         }
 
-        // 🔥 ubah jadi dipinjam
-        $pinjam->status = 'dipinjam';
-        $pinjam->save();
+        // ubah status
+        $pinjam->update([
+            'status' => 'dipinjam'
+        ]);
 
-        // 🔥 kurangi stok buku
+        // kurangi stok
         if ($pinjam->buku && $pinjam->buku->stok > 0) {
             $pinjam->buku->decrement('stok');
         }
@@ -63,50 +65,53 @@ class PeminjamanController extends \Illuminate\Routing\Controller
     {
         $pinjam = Pinjambuku::findOrFail($id);
 
-        // 🔥 FIX: kalau kosong → pending
         if (empty($pinjam->status)) {
             $pinjam->status = 'pending';
         }
 
-        // 🔥 hanya bisa ditolak kalau pending
-        if ($pinjam->status != 'pending') {
+        if ($pinjam->status !== 'pending') {
             return back()->with('success', 'Sudah diproses');
         }
 
-        // 🔥 ubah jadi ditolak
-        $pinjam->status = 'ditolak';
-        $pinjam->save();
+        $pinjam->update([
+            'status' => 'ditolak'
+        ]);
 
         return back()->with('success', 'Peminjaman ditolak');
     }
 
     /**
-     * 🔁 KEMBALIKAN
+     * 🔁 KEMBALIKAN (FINAL - AUTO SELESAI / TELAT)
      */
     public function kembalikan($id)
     {
         $pinjam = Pinjambuku::with('buku')->findOrFail($id);
 
-        // 🔥 hanya bisa dikembalikan kalau dipinjam
-        if ($pinjam->status != 'dipinjam') {
-            return back()->with('success', 'Buku belum dipinjam');
+        // hanya jika sedang dipinjam
+        if ($pinjam->status !== 'dipinjam') {
+            return back()->with('success', 'Data tidak valid untuk dikembalikan');
         }
 
         $today = now();
-        $pinjam->tanggal_kembali = $today;
 
-        // 🔥 cek telat atau tidak
-        if ($today > $pinjam->tanggal_jatuh_tempo) {
+        // tentukan status
+        if ($pinjam->tanggal_jatuh_tempo && $today->gt($pinjam->tanggal_jatuh_tempo)) {
             $hariTelat = $today->diffInDays($pinjam->tanggal_jatuh_tempo);
-            $pinjam->denda = $hariTelat * 1000;
-            $pinjam->status = 'telat';
+
+            $pinjam->update([
+                'tanggal_kembali' => $today,
+                'status' => 'telat',
+                'denda' => $hariTelat * 1000
+            ]);
         } else {
-            $pinjam->status = 'selesai';
+            $pinjam->update([
+                'tanggal_kembali' => $today,
+                'status' => 'selesai',
+                'denda' => 0
+            ]);
         }
 
-        $pinjam->save();
-
-        // 🔥 tambah stok kembali
+        // tambah stok kembali
         if ($pinjam->buku) {
             $pinjam->buku->increment('stok');
         }
