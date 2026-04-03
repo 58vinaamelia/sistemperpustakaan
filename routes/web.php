@@ -9,7 +9,7 @@ use App\Http\Controllers\AuthController;
 
 // ANGGOTA
 use App\Http\Controllers\Anggota\BukuController;
-use App\Http\Controllers\Anggota\PengembalianController;
+use App\Http\Controllers\Anggota\PengembalianController as AnggotaPengembalianController;
 use App\Http\Controllers\Anggota\PinjambukuController;
 use App\Http\Controllers\Anggota\DashboardController as AnggotaDashboardController;
 
@@ -18,10 +18,16 @@ use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardControll
 use App\Http\Controllers\Petugas\BukuController as PetugasBukuController;
 use App\Http\Controllers\Petugas\PeminjamanController;
 use App\Http\Controllers\Petugas\AnggotaController;
+use App\Http\Controllers\Petugas\PengembalianController as PetugasPengembalianController;
+
+// KEPALA
+use App\Http\Controllers\Kepala\DashboardController as KepalaDashboardController;
+use App\Http\Controllers\Kepala\LaporanController;
+use App\Http\Controllers\Kepala\BukuController as KepalaBukuController; // ✅ FIX PENTING
 
 /*
 |--------------------------------------------------------------------------
-| ROOT (FIX NOT FOUND)
+| ROOT
 |--------------------------------------------------------------------------
 */
 
@@ -67,9 +73,12 @@ Route::post('/logout', function (Request $request) {
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
+    $role = strtolower(trim($user->role));
 
-    if ($user->role == 'petugas') {
+    if ($role == 'petugas') {
         return redirect()->route('petugas.dashboard');
+    } elseif ($role == 'kepala') {
+        return redirect()->route('kepala.dashboard');
     } else {
         return redirect()->route('anggota.dashboard.index');
     }
@@ -86,20 +95,16 @@ Route::prefix('anggota')->name('anggota.')->middleware('auth')->group(function()
     Route::get('/dashboard', [AnggotaDashboardController::class, 'index'])
         ->name('dashboard.index');
 
-    // Buku
     Route::get('/buku', [BukuController::class,'index'])->name('buku.index');
     Route::get('/buku/{id}', [BukuController::class,'detail'])->name('buku.detail');
     Route::get('/buku/{id}/pinjam', [BukuController::class,'formPinjam'])->name('buku.pinjam.form');
     Route::post('/buku/{id}/pinjam', [BukuController::class,'pinjam'])->name('buku.pinjam.store');
 
-    // Peminjaman
     Route::get('/peminjaman', [PinjambukuController::class, 'index'])->name('peminjaman.index');
-    Route::get('/peminjaman/{id}', [PinjambukuController::class, 'show'])->name('peminjaman.show');
 
-    // Pengembalian
-    Route::get('/pengembalian', [PengembalianController::class, 'index'])->name('pengembalian.index');
-    Route::get('/pengembalian/create', [PengembalianController::class, 'create'])->name('pengembalian.create');
-    Route::post('/pengembalian/store', [PengembalianController::class, 'store'])->name('pengembalian.store');
+    Route::get('/pengembalian', [AnggotaPengembalianController::class, 'index'])->name('pengembalian.index');
+    Route::get('/pengembalian/create', [AnggotaPengembalianController::class, 'create'])->name('pengembalian.create');
+    Route::post('/pengembalian/store', [AnggotaPengembalianController::class, 'store'])->name('pengembalian.store');
 });
 
 /*
@@ -113,7 +118,7 @@ Route::prefix('petugas')->name('petugas.')->middleware('auth')->group(function()
     Route::get('/dashboard', [PetugasDashboardController::class, 'index'])
         ->name('dashboard');
 
-    // BUKU
+    // BUKU (FULL CRUD)
     Route::get('/buku', [PetugasBukuController::class,'index'])->name('buku.index');
     Route::get('/buku/create', [PetugasBukuController::class,'create'])->name('buku.create');
     Route::post('/buku/store', [PetugasBukuController::class,'store'])->name('buku.store');
@@ -124,19 +129,35 @@ Route::prefix('petugas')->name('petugas.')->middleware('auth')->group(function()
 
     // PEMINJAMAN
     Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
-    Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
-
     Route::post('/peminjaman/{id}/konfirmasi', [PeminjamanController::class, 'konfirmasi'])->name('peminjaman.konfirmasi');
     Route::post('/peminjaman/{id}/tolak', [PeminjamanController::class, 'tolak'])->name('peminjaman.tolak');
-    Route::post('/peminjaman/{id}/kembalikan', [PeminjamanController::class, 'kembalikan'])->name('peminjaman.kembalikan');
 
-    Route::delete('/peminjaman/{id}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');
+    // PENGEMBALIAN
+    Route::get('/pengembalian', [PetugasPengembalianController::class, 'index'])->name('pengembalian.index');
+    Route::post('/pengembalian/{id}/terima', [PetugasPengembalianController::class, 'terima'])->name('pengembalian.terima');
+    Route::post('/pengembalian/{id}/tolak', [PetugasPengembalianController::class, 'tolak'])->name('pengembalian.tolak');
+    Route::delete('/pengembalian/{id}', [PetugasPengembalianController::class, 'delete'])->name('pengembalian.delete');
 
     // ANGGOTA
     Route::get('/anggota', [AnggotaController::class, 'index'])->name('anggota.index');
 });
- /*
+
+/*
 |--------------------------------------------------------------------------
-| kepala
+| KEPALA (VIEW ONLY)
 |--------------------------------------------------------------------------
 */
+
+Route::prefix('kepala')->name('kepala.')->middleware('auth')->group(function() {
+
+    Route::get('/dashboard', [KepalaDashboardController::class, 'index'])
+        ->name('dashboard');
+
+    Route::get('/laporan', [LaporanController::class, 'index'])
+        ->name('laporan.index');
+
+    // 📚 BUKU (VIEW ONLY)
+    Route::get('/buku', [KepalaBukuController::class,'index'])->name('buku.index');
+    Route::get('/buku/{id}', [KepalaBukuController::class,'show'])->name('buku.show');
+
+});

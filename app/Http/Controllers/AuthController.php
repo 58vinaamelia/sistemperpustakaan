@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Petugas\Anggota; // 🔥 TAMBAH INI
+use App\Models\Petugas\Anggota;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,7 +19,7 @@ class AuthController extends \Illuminate\Routing\Controller
     }
 
     // ======================
-    // PROSES LOGIN
+    // PROSES LOGIN (FIX)
     // ======================
     public function login(Request $request)
     {
@@ -31,7 +31,17 @@ class AuthController extends \Illuminate\Routing\Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            return redirect('/dashboard');
+            $user = Auth::user();
+            $role = strtolower(trim($user->role));
+
+            // 🔥 REDIRECT SESUAI ROLE
+            if ($role == 'petugas') {
+                return redirect()->route('petugas.dashboard');
+            } elseif ($role == 'kepala') {
+                return redirect()->route('kepala.dashboard');
+            } else {
+                return redirect()->route('anggota.dashboard.index');
+            }
         }
 
         return back()->with('error','Email atau password salah');
@@ -48,19 +58,18 @@ class AuthController extends \Illuminate\Routing\Controller
             'password' => 'required|min:6|confirmed'
         ]);
 
-        // ✅ SIMPAN KE USERS
+        // SIMPAN KE USERS
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'anggota', // 🔥 penting
+            'role' => 'anggota',
         ]);
 
-        // 🔥 SIMPAN KE ANGGOTA
+        // SIMPAN KE ANGGOTA
         Anggota::create([
             'nama' => $user->name,
             'email' => $user->email,
-            // ❗ password optional (boleh dihapus kalau mau)
             'password' => $user->password,
         ]);
 

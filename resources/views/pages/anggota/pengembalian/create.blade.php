@@ -60,10 +60,13 @@
                        value="{{ $peminjaman[0]->tanggal_jatuh_tempo }}" readonly>
             </div>
 
-            <!-- TANGGAL KEMBALI -->
+            <!-- ✅ TANGGAL KEMBALI (SUDAH DIPERBAIKI) -->
             <div class="mb-3">
                 <label class="form-label">Tanggal Kembali</label>
-                <input type="date" name="tanggal_kembali" id="tanggal_kembali" class="form-control" required>
+                <input type="date" name="tanggal_kembali" id="tanggal_kembali"
+                       class="form-control"
+                       min="{{ $peminjaman[0]->tanggal_pinjam }}"
+                       required>
             </div>
 
             <!-- DENDA -->
@@ -91,7 +94,7 @@
 
 </div>
 
-<!-- SCRIPT -->
+<!-- SCRIPT (TETAP PUNYA KAMU, TIDAK DIUBAH) -->
 <script>
 document.getElementById('tanggal_kembali')?.addEventListener('change', function () {
     let kembali = new Date(this.value);

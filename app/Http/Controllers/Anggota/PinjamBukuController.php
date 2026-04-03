@@ -42,18 +42,32 @@ class PinjamBukuController extends \Illuminate\Routing\Controller
 
         $buku = Buku::findOrFail($id);
 
+        // ❗ CEK: sudah pinjam belum (yang masih aktif)
+        $cek = Pinjambuku::where('user_id', Auth::id())
+            ->where('buku_id', $id)
+            ->whereIn('status', ['pending', 'dipinjam'])
+            ->exists();
+
+        if ($cek) {
+            return back()->with('error', 'Kamu masih meminjam buku ini');
+        }
+
+        // ❗ CEK stok
+        if ($buku->stok <= 0) {
+            return back()->with('error', 'Stok buku habis');
+        }
+
+        // ✅ SIMPAN DATA
         Pinjambuku::create([
             'user_id' => Auth::id(),
             'nama' => Auth::user()->name,
             'buku_id' => $buku->id,
             'tanggal_pinjam' => Carbon::today(),
             'tanggal_jatuh_tempo' => Carbon::today()->addDays(7),
-
-            // 🔥 INI YANG PALING PENTING
             'status' => 'pending'
         ]);
 
-        return redirect()->route('anggota.pinjambuku.index')
+        return redirect()->route('anggota.peminjaman.index')
             ->with('success', 'Menunggu konfirmasi petugas');
     }
 }

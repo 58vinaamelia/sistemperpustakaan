@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Storage;
 
 class BukuController extends \Illuminate\Routing\Controller
 {
+    // ==========================
     // LIST
+    // ==========================
     public function index(Request $request)
     {
         $search = $request->search;
@@ -20,22 +22,28 @@ class BukuController extends \Illuminate\Routing\Controller
         return view('pages.petugas.buku.index', compact('buku'));
     }
 
+    // ==========================
     // CREATE FORM
+    // ==========================
     public function create()
     {
         return view('pages.petugas.buku.create');
     }
 
-    // STORE
+    // ==========================
+    // STORE (FIX DUPLIKAT)
+    // ==========================
     public function store(Request $request)
     {
         $request->validate([
-            'judul' => 'required',
+            'judul' => 'required|unique:buku,judul', // 🔥 TIDAK BOLEH SAMA
             'pengarang' => 'required',
             'penerbit' => 'required',
             'tahun' => 'required|numeric',
             'stok' => 'required|numeric',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'judul.unique' => 'Judul buku sudah ada!',
         ]);
 
         $foto = null;
@@ -48,7 +56,7 @@ class BukuController extends \Illuminate\Routing\Controller
             'judul' => $request->judul,
             'pengarang' => $request->pengarang,
             'penerbit' => $request->penerbit,
-            'tahun' => $request->tahun, 
+            'tahun' => $request->tahun,
             'stok' => $request->stok,
             'deskripsi' => $request->deskripsi,
             'foto' => $foto,
@@ -58,39 +66,48 @@ class BukuController extends \Illuminate\Routing\Controller
             ->with('success', 'Buku berhasil ditambahkan');
     }
 
+    // ==========================
     // SHOW
+    // ==========================
     public function show($id)
     {
         $buku = Buku::findOrFail($id);
         return view('pages.petugas.buku.show', compact('buku'));
     }
 
+    // ==========================
     // EDIT
+    // ==========================
     public function edit($id)
     {
         $buku = Buku::findOrFail($id);
         return view('pages.petugas.buku.edit', compact('buku'));
     }
 
-    // UPDATE
+    // ==========================
+    // UPDATE (FIX DUPLIKAT)
+    // ==========================
     public function update(Request $request, $id)
     {
         $buku = Buku::findOrFail($id);
 
         $request->validate([
-            'judul' => 'required',
+            // 🔥 BOLEH SAMA DENGAN DIRINYA SENDIRI
+            'judul' => 'required|unique:buku,judul,' . $id,
             'pengarang' => 'required',
             'penerbit' => 'required',
-            'tahun' => 'required|numeric', // ✅ FIX
+            'tahun' => 'required|numeric',
             'stok' => 'required|numeric',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'judul.unique' => 'Judul buku sudah ada!',
         ]);
 
         $data = [
             'judul' => $request->judul,
             'pengarang' => $request->pengarang,
             'penerbit' => $request->penerbit,
-            'tahun' => $request->tahun, // ✅ FIX
+            'tahun' => $request->tahun,
             'stok' => $request->stok,
             'deskripsi' => $request->deskripsi,
         ];
@@ -109,7 +126,9 @@ class BukuController extends \Illuminate\Routing\Controller
             ->with('success', 'Buku berhasil diupdate');
     }
 
+    // ==========================
     // DELETE
+    // ==========================
     public function destroy($id)
     {
         $buku = Buku::findOrFail($id);

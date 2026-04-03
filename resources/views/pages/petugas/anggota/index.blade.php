@@ -13,27 +13,44 @@
         </div>
     @endif
 
-    <table class="table-auto w-full border border-gray-300">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="border px-4 py-2">No</th>
-                <th class="border px-4 py-2">Nama</th>
-                <th class="border px-4 py-2">Email</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($anggota as $item)
+    {{-- Tabel Anggota --}}
+    <div class="overflow-x-auto w-full">
+        <table class="w-full border border-gray-300 divide-y divide-gray-200 min-w-[600px]">
+            <thead class="bg-gray-100">
                 <tr>
-                    <td class="border px-4 py-2">{{ $loop->iteration }}</td>
-                    <td class="border px-4 py-2">{{ $item->nama }}</td>
-                    <td class="border px-4 py-2">{{ $item->email }}</td>
+                    <th class="px-4 py-2 text-left text-gray-700">No</th>
+                    <th class="px-4 py-2 text-left text-gray-700">Nama</th>
+                    <th class="px-4 py-2 text-left text-gray-700">Email</th>
+                    <th class="px-4 py-2 text-left text-gray-700">Aksi</th>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="3" class="text-center border px-4 py-2">Belum ada data anggota</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @forelse ($anggota as $item)
+                    <tr>
+                        <td class="px-4 py-2">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-2">{{ $item->nama }}</td>
+                        <td class="px-4 py-2">{{ $item->email }}</td>
+                        <td class="px-4 py-2">
+                            <form action="{{ route('petugas.anggota.destroy', $item->id) }}" method="POST"
+                                  onsubmit="return confirm('Yakin ingin menghapus anggota ini?')" class="inline-block">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded shadow">
+                                    Hapus
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center px-4 py-2 text-gray-500">
+                            Belum ada data anggota
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 @endsection

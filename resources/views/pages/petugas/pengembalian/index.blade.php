@@ -3,65 +3,100 @@
 @section('title', 'Data Pengembalian')
 
 @section('content')
+<div class="container mt-4">
 
-<div class="p-6">
+    <h3 class="mb-4">Data Pengembalian Buku</h3>
 
-    <h1 class="text-2xl font-bold mb-4">Data Pengembalian</h1>
+    {{-- NOTIFIKASI --}}
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
-    <div class="bg-white shadow rounded-lg overflow-x-auto">
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
 
-        <table class="min-w-full text-sm text-left">
-            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                <tr>
-                    <th class="px-6 py-3">No</th>
-                    <th class="px-6 py-3">Nama Anggota</th>
-                    <th class="px-6 py-3">Judul Buku</th>
-                    <th class="px-6 py-3">Tanggal Pinjam</th>
-                    <th class="px-6 py-3">Tanggal Kembali</th>
-                    <th class="px-6 py-3">Status</th>
-                </tr>
-            </thead>
+    <table class="table table-bordered table-striped">
+        <thead class="table-light text-center">
+            <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Buku</th>
+                <th>Tanggal Kembali</th>
+                <th>Denda</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
 
-            <tbody class="text-gray-700">
-                @forelse($pengembalians as $item)
-                <tr class="border-b">
-                    <td class="px-6 py-3">{{ $loop->iteration }}</td>
+        <tbody class="text-center">
+            @forelse($data as $item)
+            <tr>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ $item->user->name ?? 'User tidak ditemukan' }}</td>
+                <td>{{ $item->buku->judul ?? 'Buku tidak ditemukan' }}</td>
+                <td>{{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d-m-Y') }}</td>
+                <td>Rp {{ number_format($item->denda, 0, ',', '.') }}</td>
 
-                    <td class="px-6 py-3">
-                        {{ $item->user->name ?? '-' }}
-                    </td>
+                {{-- STATUS --}}
+                <td>
+                    @if($item->status == 'menunggu')
+                        <span class="badge bg-warning text-dark">Menunggu</span>
 
-                    <td class="px-6 py-3">
-                        {{ $item->buku->judul ?? '-' }}
-                    </td>
+                    @elseif($item->status == 'diterima')
+                        <span class="badge bg-success">Dikembalikan</span>
 
-                    <td class="px-6 py-3">
-                        {{ $item->peminjaman->tanggal_pinjam ?? '-' }}
-                    </td>
+                    @elseif($item->status == 'ditolak')
+                        <span class="badge bg-danger">Ditolak</span>
 
-                    <td class="px-6 py-3">
-                        {{ $item->tanggal_kembali }}
-                    </td>
+                    @else
+                        <span class="badge bg-secondary">-</span>
+                    @endif
+                </td>
 
-                    <td class="px-6 py-3">
-                        <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
-                            Dikembalikan
-                        </span>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" class="text-center py-4">
-                        Data kosong
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
+                {{-- AKSI --}}
+                <td>
+                    @if($item->status == 'menunggu')
+                        <div class="d-flex justify-content-center gap-2">
 
-        </table>
+                            {{-- TERIMA --}}
+                            <form action="{{ route('petugas.pengembalian.terima', $item->id) }}" method="POST"
+                                onsubmit="return confirm('Yakin konfirmasi pengembalian ini?')">
+                                @csrf
+                                <button type="submit" class="btn btn-success btn-sm">Terima</button>
+                            </form>
 
-    </div>
+                            {{-- TOLAK --}}
+                            <form action="{{ route('petugas.pengembalian.tolak', $item->id) }}" method="POST"
+                                onsubmit="return confirm('Yakin tolak pengembalian ini?')">
+                                @csrf
+                                <button type="submit" class="btn btn-danger btn-sm">Tolak</button>
+                            </form>
 
+                        </div>
+                    @else
+                        <span class="text-success fw-bold">Selesai</span>
+                    @endif
+
+                    {{-- DELETE --}}
+                    <form action="{{ route('petugas.pengembalian.delete', $item->id) }}" method="POST" class="mt-2"
+                        onsubmit="return confirm('Yakin hapus data ini?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-dark btn-sm">Hapus</button>
+                    </form>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="7" class="text-center text-muted">Tidak ada data pengembalian</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
 </div>
-
 @endsection

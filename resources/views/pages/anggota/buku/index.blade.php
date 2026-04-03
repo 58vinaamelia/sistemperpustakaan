@@ -35,9 +35,16 @@
             </div>
 
             <!-- JUDUL -->
-            <h6 class="mb-2" style="font-size:13px;">
+            <h6 class="mb-1" style="font-size:13px;">
                 {{ $item->judul }}
             </h6>
+
+            <!-- STATUS (FIX) -->
+            @if($item->sedang_dipinjam)
+                <span class="badge bg-danger mb-2">Sedang Dipinjam</span>
+            @else
+                <span class="badge bg-success mb-2">Tersedia</span>
+            @endif
 
             <!-- BUTTON -->
             <a href="{{ route('anggota.buku.detail', $item->id) }}"

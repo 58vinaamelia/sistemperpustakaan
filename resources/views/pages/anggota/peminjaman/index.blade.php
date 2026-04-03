@@ -31,33 +31,50 @@
                     <td style="padding:12px 16px;">{{ $item->buku->judul ?? '-' }}</td>
                     <td style="padding:12px 16px;">{{ $item->tanggal_pinjam }}</td>
                     <td style="padding:12px 16px;">{{ $item->tanggal_jatuh_tempo }}</td>
+
                     <td style="padding:12px 16px;">
                         @php
-                            $status = strtolower($item->status ?? 'pending');
+                            $status = strtolower(trim($item->status ?? ''));
                         @endphp
 
                         @if($status == 'dipinjam')
                             <span style="background:#22c55e; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
                                 Dipinjam
                             </span>
-                        @elseif($status == 'dikembalikan' || $status == 'selesai')
+
+                        @elseif($status == 'dikembalikan')
                             <span style="background:#3b82f6; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
                                 Dikembalikan
                             </span>
-                        @elseif($status == 'telat')
-                            <span style="background:#ef4444; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
-                                Terlambat
+
+                        @elseif($status == 'menunggu')
+                            <span style="background:#facc15; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
+                                Menunggu
                             </span>
+
+                        @elseif($status == 'pending')
+                            <span style="background:#facc15; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
+                                pending
+                            </span>
+
                         @elseif($status == 'ditolak')
                             <span style="background:#6b7280; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
                                 Ditolak
                             </span>
+
+                        @elseif($status == 'telat')
+                            <span style="background:#ef4444; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
+                                Terlambat
+                            </span>
+
                         @else
-                            <span style="background:#facc15; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
-                                Pending
+                            <!-- 🔥 tampilkan status asli biar gak nyangkut -->
+                            <span style="background:#6b7280; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
+                                {{ ucfirst($item->status) }}
                             </span>
                         @endif
                     </td>
+
                 </tr>
                 @empty
                 <tr>

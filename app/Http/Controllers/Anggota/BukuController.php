@@ -19,6 +19,13 @@ class BukuController extends \Illuminate\Routing\Controller
                   ->orWhere('pengarang', 'like', "%$search%");
         })->get();
 
+        // 🔥 TAMBAHAN: CEK STATUS DIPINJAM
+        foreach ($buku as $item) {
+            $item->sedang_dipinjam = Pinjambuku::where('buku_id', $item->id)
+                ->where('status', 'dipinjam')
+                ->exists();
+        }
+
         return view('pages.anggota.buku.index', compact('buku'));
     }
 
@@ -26,7 +33,6 @@ class BukuController extends \Illuminate\Routing\Controller
     {
         $buku = Buku::findOrFail($id);
 
-        // 🔥 FIX: pakai huruf kecil
         $dipinjam = Pinjambuku::where('user_id', Auth::id())
             ->where('buku_id', $id)
             ->where('status', 'dipinjam')
@@ -45,7 +51,6 @@ class BukuController extends \Illuminate\Routing\Controller
     {
         $buku = Buku::findOrFail($id);
 
-        // 🔥 FIX: huruf kecil
         $cek = Pinjambuku::where('user_id', Auth::id())
             ->where('buku_id', $id)
             ->where('status', 'dipinjam')
@@ -57,17 +62,12 @@ class BukuController extends \Illuminate\Routing\Controller
 
         if ($buku->stok > 0) {
 
-            // ❌ HAPUS INI (stok jangan dikurangi di sini)
-            // $buku->decrement('stok');
-
             Pinjambuku::create([
                 'user_id' => Auth::id(),
                 'nama' => Auth::user()->name,
                 'buku_id' => $buku->id,
                 'tanggal_pinjam' => Carbon::today(),
                 'tanggal_jatuh_tempo' => Carbon::today()->addDays(7),
-
-                // 🔥 PALING PENTING
                 'status' => 'pending'
             ]);
 
