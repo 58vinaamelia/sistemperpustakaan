@@ -61,7 +61,7 @@
             </p>
 
             <!-- BUTTON DETAIL SAJA -->
-            <a href="{{ route('petugas.buku.show', $item->id) }}"
+            <a href="{{ route('kepala.buku.show', $item->id) }}"
                class="btn btn-sm text-white"
                style="background:#4e63c9; width:100%;">
                 Detail

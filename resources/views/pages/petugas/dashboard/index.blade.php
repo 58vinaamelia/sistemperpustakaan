@@ -34,18 +34,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm flex items-center gap-4 px-5 py-4 w-60">
-            <div class="bg-green-100 p-3 rounded-full">
-                <i class="ti ti-wallet text-green-500"></i>
-            </div>
-            <div>
-                <p class="text-gray-500 text-sm">Total Denda</p>
-                <h2 class="text-lg font-bold">
-                    Rp {{ number_format($totalDenda,0,',','.') }}
-                </h2>
-            </div>
-        </div>
-
+        
         <div class="bg-white rounded-xl shadow-sm flex items-center gap-4 px-5 py-4 w-60">
             <div class="bg-blue-100 p-3 rounded-full">
                 <i class="ti ti-book text-blue-500"></i>
@@ -137,7 +126,7 @@
                         <!-- AKSI (TIDAK DIUBAH) -->
                         <td class="py-2">
                             <div class="flex justify-center items-center gap-2">
-                            
+
                                 <!-- DELETE -->
                                 <form action="{{ route('petugas.peminjaman.destroy', $item->id) }}"
                                       method="POST"

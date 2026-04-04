@@ -1,29 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-
-// CONTROLLER
-use App\Http\Controllers\AuthController;
-
-// ANGGOTA
 use App\Http\Controllers\Anggota\BukuController;
+use App\Http\Controllers\Anggota\DashboardController as AnggotaDashboardController;
 use App\Http\Controllers\Anggota\PengembalianController as AnggotaPengembalianController;
 use App\Http\Controllers\Anggota\PinjambukuController;
-use App\Http\Controllers\Anggota\DashboardController as AnggotaDashboardController;
-
-// PETUGAS
-use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
-use App\Http\Controllers\Petugas\BukuController as PetugasBukuController;
-use App\Http\Controllers\Petugas\PeminjamanController;
-use App\Http\Controllers\Petugas\AnggotaController;
-use App\Http\Controllers\Petugas\PengembalianController as PetugasPengembalianController;
-
-// KEPALA
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Kepala\BukuController as KepalaBukuController; // ✅ FIX PENTING
 use App\Http\Controllers\Kepala\DashboardController as KepalaDashboardController;
 use App\Http\Controllers\Kepala\LaporanController;
-use App\Http\Controllers\Kepala\BukuController as KepalaBukuController; // ✅ FIX PENTING
+use App\Http\Controllers\Kepala\PetugasController;
+use App\Http\Controllers\Petugas\AnggotaController;
+use App\Http\Controllers\Petugas\BukuController as PetugasBukuController;
+use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
+use App\Http\Controllers\Petugas\PeminjamanController;
+use App\Http\Controllers\Petugas\PengembalianController as PetugasPengembalianController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -118,7 +111,9 @@ Route::prefix('petugas')->name('petugas.')->middleware('auth')->group(function()
     Route::get('/dashboard', [PetugasDashboardController::class, 'index'])
         ->name('dashboard');
 
+    // =======================
     // BUKU (FULL CRUD)
+    // =======================
     Route::get('/buku', [PetugasBukuController::class,'index'])->name('buku.index');
     Route::get('/buku/create', [PetugasBukuController::class,'create'])->name('buku.create');
     Route::post('/buku/store', [PetugasBukuController::class,'store'])->name('buku.store');
@@ -127,24 +122,34 @@ Route::prefix('petugas')->name('petugas.')->middleware('auth')->group(function()
     Route::put('/buku/{id}', [PetugasBukuController::class,'update'])->name('buku.update');
     Route::delete('/buku/{id}', [PetugasBukuController::class,'destroy'])->name('buku.destroy');
 
-    // PEMINJAMAN
+    // =======================
+    // PEMINJAMAN (FIX DI SINI)
+    // =======================
     Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
     Route::post('/peminjaman/{id}/konfirmasi', [PeminjamanController::class, 'konfirmasi'])->name('peminjaman.konfirmasi');
     Route::post('/peminjaman/{id}/tolak', [PeminjamanController::class, 'tolak'])->name('peminjaman.tolak');
 
+    // ✅ INI YANG TADI KURANG
+    Route::delete('/peminjaman/{id}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');
+
+    // =======================
     // PENGEMBALIAN
+    // =======================
     Route::get('/pengembalian', [PetugasPengembalianController::class, 'index'])->name('pengembalian.index');
     Route::post('/pengembalian/{id}/terima', [PetugasPengembalianController::class, 'terima'])->name('pengembalian.terima');
     Route::post('/pengembalian/{id}/tolak', [PetugasPengembalianController::class, 'tolak'])->name('pengembalian.tolak');
     Route::delete('/pengembalian/{id}', [PetugasPengembalianController::class, 'delete'])->name('pengembalian.delete');
 
+    // =======================
     // ANGGOTA
+    // =======================
     Route::get('/anggota', [AnggotaController::class, 'index'])->name('anggota.index');
+    Route::delete('/anggota/{id}', [AnggotaController::class, 'destroy'])->name('anggota.destroy');
 });
 
 /*
 |--------------------------------------------------------------------------
-| KEPALA (VIEW ONLY)
+| KEPALA
 |--------------------------------------------------------------------------
 */
 
@@ -159,5 +164,16 @@ Route::prefix('kepala')->name('kepala.')->middleware('auth')->group(function() {
     // 📚 BUKU (VIEW ONLY)
     Route::get('/buku', [KepalaBukuController::class,'index'])->name('buku.index');
     Route::get('/buku/{id}', [KepalaBukuController::class,'show'])->name('buku.show');
+
+    // =======================
+    // 👮 PETUGAS
+    // =======================
+     Route::get('/petugas', [PetugasController::class, 'index'])->name('petugas.index');
+
+    Route::get('/petugas/create', [PetugasController::class, 'create'])->name('petugas.create');
+
+    Route::post('/petugas', [PetugasController::class, 'store'])->name('petugas.store');
+
+    Route::delete('/petugas/{id}', [PetugasController::class, 'destroy'])->name('petugas.destroy');
 
 });

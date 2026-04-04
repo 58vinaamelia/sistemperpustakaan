@@ -110,14 +110,14 @@
                 </li>
 
                 <li>
-                    <a href="/kepala/petugas/create"
-                       class="flex items-center gap-3 px-2 py-2 rounded-lg transition
-                       {{ request()->is('kepala/petugas/create') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
-                        <i class="ti ti-user-plus text-lg"></i>
-                        Tambah Petugas
+                    <a href="{{ route('kepala.petugas.index') }}"
+                    class="flex items-center gap-3 px-2 py-2 rounded-lg transition
+                    {{ request()->is('kepala/petugas') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
+
+                        <i class="ti ti-users text-lg"></i>
+                        Petugas
                     </a>
                 </li>
-
                 <li>
                     <a href="/kepala/buku"
                        class="flex items-center gap-3 px-2 py-2 rounded-lg transition
