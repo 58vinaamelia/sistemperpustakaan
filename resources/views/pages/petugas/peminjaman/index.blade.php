@@ -112,7 +112,7 @@
                         @else
                             <span style="color:gray; font-style:italic;">Sudah diproses</span>
                         @endif
-
+ 
                     </td>
 
                 </tr>

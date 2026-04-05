@@ -8,7 +8,7 @@ use App\Models\Kepala\Buku;
 
 class Peminjaman extends Model
 {
-    protected $table = 'peminjaman';
+    protected $table = 'pinjambuku'; // 🔥 INI YANG DIGANTI
 
     protected $fillable = [
         'user_id',

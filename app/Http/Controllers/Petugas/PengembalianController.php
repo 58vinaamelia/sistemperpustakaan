@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Petugas;
 use App\Http\Controllers\Controller;
 use App\Models\Petugas\Pengembalian;
 use App\Models\Petugas\Peminjaman;
-use App\Models\Anggota\Pinjambuku; // 🔥 WAJIB TAMBAH INI
+use App\Models\Anggota\Pinjambuku; // 🔥 pastikan ini model anggota/anggota pinjam buku
 use Illuminate\Http\Request;
 
 class PengembalianController extends \Illuminate\Routing\Controller
@@ -22,37 +22,41 @@ class PengembalianController extends \Illuminate\Routing\Controller
     // ==========================
     // TERIMA PENGEMBALIAN (FIX TOTAL)
     // ==========================
-    public function terima($id)
-    {
-        $pengembalian = Pengembalian::findOrFail($id);
+    public function terima(Request $request, $id)
+{
+    $pengembalian = Pengembalian::findOrFail($id);
 
-        // 1. update status pengembalian
-        $pengembalian->status = 'diterima';
-        $pengembalian->save();
+    // ✅ ambil tanggal dari pengajuan anggota
+    $tanggal = $pengembalian->tanggal_kembali;
 
-        // 2. update peminjaman (tabel petugas)
-        if ($pengembalian->peminjaman_id) {
-            $peminjaman = Peminjaman::find($pengembalian->peminjaman_id);
+    // 1️⃣ Update status pengembalian
+    $pengembalian->status = 'diterima';
+    $pengembalian->save();
 
-            if ($peminjaman) {
-                $peminjaman->status = 'selesai';
-                $peminjaman->save();
-            }
+    // 2️⃣ Update peminjaman
+    if ($pengembalian->peminjaman_id) {
+        $peminjaman = Peminjaman::find($pengembalian->peminjaman_id);
+
+        if ($peminjaman) {
+            $peminjaman->status = 'selesai';
+            $peminjaman->tanggal_kembali = $tanggal; // ✅ FIX
+            $peminjaman->save();
         }
-
-        // 3. 🔥 UPDATE PINJAMBUKU (BIAR ANGGOTA IKUT BERUBAH)
-        $pinjam = Pinjambuku::where('user_id', $pengembalian->user_id)
-            ->where('buku_id', $pengembalian->buku_id)
-            ->whereIn('status', ['pending', 'dipinjam', 'menunggu'])
-            ->get();
-
-        foreach ($pinjam as $p) {
-            $p->status = 'dikembalikan'; // 🔥 INI YANG BIKIN BERUBAH
-            $p->save();
-        }
-
-        return back()->with('success', 'Pengembalian dikonfirmasi & semua status berhasil diupdate');
     }
+
+    // 3️⃣ Update pinjam buku
+    $pinjam = Pinjambuku::where('user_id', $pengembalian->user_id)
+        ->where('buku_id', $pengembalian->buku_id)
+        ->get();
+
+    foreach ($pinjam as $p) {
+        $p->status = 'dikembalikan';
+        $p->tanggal_kembali = $tanggal; // ✅ FIX
+        $p->save();
+    }
+
+    return back()->with('success', 'Pengembalian dikonfirmasi & semua status berhasil diupdate');
+}
 
     // ==========================
     // TOLAK PENGEMBALIAN
