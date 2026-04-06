@@ -1,15 +1,14 @@
 <aside class="w-64 bg-white shadow-sm min-h-screen flex flex-col">
 
-    <div>
+    <div class="mt-6">
         <!-- HEADER -->
-        <div class="py-8 text-center border-b">
-            <h1 class="text-xl font-bold text-gray-800 leading-tight">
-                Sistem <br> Perpustakaan
+       <div class="pt-6 pb-2 text-center">
+            <h1 class="text-xl font-bold text-gray-800 tracking-wide">
+                Sistem Perpustakaan
             </h1>
         </div>
-
         <!-- PROFILE -->
-        <div class="flex flex-col items-center py-6 border-b">
+        <div class="flex flex-col items-center pt-2 pb-4">
             @if(Auth::user()->photo)
                 <div class="w-20 h-20 mb-3 rounded-full overflow-hidden">
                     <img src="{{ asset('storage/' . Auth::user()->photo) }}"

@@ -11,6 +11,46 @@
            class="w-full px-4 py-2 border rounded-md focus:outline-none">
 </form>
 
+<!-- CARD SUMMARY -->
+<div style="display:flex; gap:20px; margin-bottom:20px; flex-wrap:wrap;">
+
+    <!-- Card 1 -->
+    <div style="flex:1; min-width:250px; background:#f9fafb; padding:20px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); display:flex; align-items:center; gap:15px;">
+
+        <div style="background:#dbeafe; padding:12px; border-radius:50%; font-size:20px;">
+            📘
+        </div>
+
+        <div>
+            <div style="font-size:14px; color:#6b7280;">
+                Total Buku Dipinjam
+            </div>
+            <div style="font-size:24px; font-weight:bold;">
+                {{ $totalDipinjam }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div style="flex:1; min-width:250px; background:#f9fafb; padding:20px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); display:flex; align-items:center; gap:15px;">
+
+        <div style="background:#dbeafe; padding:12px; border-radius:50%; font-size:20px;">
+            📗
+        </div>
+
+        <div>
+            <div style="font-size:14px; color:#6b7280;">
+                Total Dikembalikan
+            </div>
+            <div style="font-size:24px; font-weight:bold;">
+                {{ $totalDikembalikan }}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
 <!-- TABEL -->
 <table class="w-full text-sm border-collapse">
 

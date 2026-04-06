@@ -34,7 +34,7 @@
             </div>
         </div>
 
-        
+
         <div class="bg-white rounded-xl shadow-sm flex items-center gap-4 px-5 py-4 w-60">
             <div class="bg-blue-100 p-3 rounded-full">
                 <i class="ti ti-book text-blue-500"></i>

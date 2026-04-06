@@ -42,7 +42,16 @@ class PinjamBukuController extends \Illuminate\Routing\Controller
 
         $buku = Buku::findOrFail($id);
 
-        // ❗ CEK: sudah pinjam belum (yang masih aktif)
+        // 🔥 1. CEK LIMIT 3 BUKU
+        $jumlahPinjam = Pinjambuku::where('user_id', Auth::id())
+            ->whereIn('status', ['pending', 'dipinjam'])
+            ->count();
+
+        if ($jumlahPinjam >= 3) {
+            return back()->with('error', 'Kamu sudah mencapai limit 3 buku! Kembalikan buku terlebih dahulu.');
+        }
+
+        // 🔥 2. CEK: sudah pinjam buku yang sama belum
         $cek = Pinjambuku::where('user_id', Auth::id())
             ->where('buku_id', $id)
             ->whereIn('status', ['pending', 'dipinjam'])
@@ -52,7 +61,7 @@ class PinjamBukuController extends \Illuminate\Routing\Controller
             return back()->with('error', 'Kamu masih meminjam buku ini');
         }
 
-        // ❗ CEK stok
+        // 🔥 3. CEK stok
         if ($buku->stok <= 0) {
             return back()->with('error', 'Stok buku habis');
         }

@@ -27,6 +27,20 @@ class DashboardController extends \Illuminate\Routing\Controller
 
         $peminjaman = $query->get();
 
-        return view('pages.anggota.dashboard.index', compact('peminjaman'));
+        // 🔥 TAMBAHAN WAJIB (BIAR CARD JALAN)
+        $totalDipinjam = Pinjambuku::where('user_id', Auth::id())
+            ->where('status', 'dipinjam')
+            ->count();
+
+        $totalDikembalikan = Pinjambuku::where('user_id', Auth::id())
+            ->where('status', 'dikembalikan')
+            ->count();
+
+        // 🔥 KIRIM KE VIEW
+        return view('pages.anggota.dashboard.index', compact(
+            'peminjaman',
+            'totalDipinjam',
+            'totalDikembalikan'
+        ));
     }
 }

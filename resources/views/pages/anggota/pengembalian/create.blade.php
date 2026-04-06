@@ -33,18 +33,43 @@
 
             <!-- JUDUL BUKU -->
             <div class="mb-3">
-                <label class="form-label">Judul Buku</label>
+    <label class="form-label">Judul Buku</label>
 
-                <select name="buku_id" class="form-control" required>
-                    <option value="" disabled selected>Pilih buku yang dikembalikan</option>
-                    @foreach($peminjaman as $item)
-                        <option value="{{ $item->buku_id }}">
-                            {{ $item->buku->judul }}
-                            (Pinjam: {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') }})
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+    <div class="position-relative">
+
+        <select name="buku_id"
+                class="form-control pe-5"
+                size="1"
+                onfocus="this.size=5;"
+                onblur="this.size=1;"
+                onchange="this.size=1; this.blur();"
+                required>
+
+            <option value="" disabled selected>Pilih buku yang dikembalikan</option>
+
+            @foreach($peminjaman as $item)
+                <option value="{{ $item->buku_id }}">
+                    {{ $item->buku->judul }}
+                    (Pinjam: {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') }})
+                </option>
+            @endforeach
+
+        </select>
+
+        <!-- ICON -->
+        <span style="
+            position:absolute;
+            right:15px;
+            top:50%;
+            transform:translateY(-50%);
+            pointer-events:none;
+            font-size:14px;
+        ">
+            ▼
+        </span>
+
+    </div>
+</div>
 
             <!-- TANGGAL PINJAM -->
             <div class="mb-3">
