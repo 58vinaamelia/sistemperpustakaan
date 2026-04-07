@@ -49,7 +49,9 @@
         <!-- STOK -->
         <div class="mb-3">
             <label>Stok</label>
-            <input type="number" name="stok" class="form-control" value="{{ old('stok', $buku->stok) }}">
+            <input type="number" name="stok" class="form-control"
+                value="{{ old('stok', $buku->stok) }}"
+                min="0">
         </div>
 
         <!-- DESKRIPSI -->

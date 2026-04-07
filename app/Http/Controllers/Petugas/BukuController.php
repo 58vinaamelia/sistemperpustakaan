@@ -88,43 +88,30 @@ class BukuController extends \Illuminate\Routing\Controller
     // UPDATE (FIX DUPLIKAT)
     // ==========================
     public function update(Request $request, $id)
-    {
-        $buku = Buku::findOrFail($id);
+{
+    // VALIDASI 🔥
+    $request->validate([
+        'judul' => 'required',
+        'pengarang' => 'required',
+        'penerbit' => 'required',
+        'tahun' => 'required|numeric',
+        'stok' => 'required|integer|min:0', // ❗ ini penting
+    ]);
 
-        $request->validate([
-            // 🔥 BOLEH SAMA DENGAN DIRINYA SENDIRI
-            'judul' => 'required|unique:buku,judul,' . $id,
-            'pengarang' => 'required',
-            'penerbit' => 'required',
-            'tahun' => 'required|numeric',
-            'stok' => 'required|numeric',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ], [
-            'judul.unique' => 'Judul buku sudah ada!',
-        ]);
+    $buku = Buku::findOrFail($id);
 
-        $data = [
-            'judul' => $request->judul,
-            'pengarang' => $request->pengarang,
-            'penerbit' => $request->penerbit,
-            'tahun' => $request->tahun,
-            'stok' => $request->stok,
-            'deskripsi' => $request->deskripsi,
-        ];
+    $buku->update([
+        'judul' => $request->judul,
+        'pengarang' => $request->pengarang,
+        'penerbit' => $request->penerbit,
+        'tahun_terbit' => $request->tahun,
+        'stok' => $request->stok,
+        'deskripsi' => $request->deskripsi,
+    ]);
 
-        if ($request->hasFile('foto')) {
-            if ($buku->foto) {
-                Storage::disk('public')->delete($buku->foto);
-            }
-
-            $data['foto'] = $request->file('foto')->store('buku', 'public');
-        }
-
-        $buku->update($data);
-
-        return redirect()->route('petugas.buku.index')
-            ->with('success', 'Buku berhasil diupdate');
-    }
+    return redirect()->route('petugas.buku.index')
+        ->with('success', 'Buku berhasil diupdate');
+} 
 
     // ==========================
     // DELETE

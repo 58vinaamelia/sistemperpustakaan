@@ -4,24 +4,27 @@ namespace App\Http\Controllers\Kepala;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Anggota\Pinjambuku; // ✅ ambil dari sini
+use App\Models\Anggota\Pinjambuku;
 
 class LaporanController extends \Illuminate\Routing\Controller
 {
     public function index(Request $request)
     {
-        $query = Pinjambuku::with(['user', 'buku']);
+        // validasi input tanggal
+        $request->validate([
+            'dari' => 'nullable|date',
+            'sampai' => 'nullable|date|after_or_equal:dari',
+        ]);
 
-        // filter tanggal
-        if ($request->filled('dari')) {
-            $query->whereDate('tanggal_pinjam', '>=', $request->dari);
-        }
-
-        if ($request->filled('sampai')) {
-            $query->whereDate('tanggal_pinjam', '<=', $request->sampai);
-        }
-
-        $peminjaman = $query->latest()->get();
+        $peminjaman = Pinjambuku::with(['user', 'buku'])
+            ->when($request->dari, function ($query) use ($request) {
+                $query->whereDate('tanggal_pinjam', '>=', $request->dari);
+            })
+            ->when($request->sampai, function ($query) use ($request) {
+                $query->whereDate('tanggal_pinjam', '<=', $request->sampai);
+            })
+            ->orderBy('tanggal_pinjam', 'desc') // urut terbaru
+            ->get();
 
         return view('pages.kepala.laporan.index', compact('peminjaman'));
     }

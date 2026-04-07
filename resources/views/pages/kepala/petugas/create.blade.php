@@ -26,49 +26,51 @@
         @endif
 
         {{-- FORM --}}
-        <form action="{{ route('kepala.petugas.store') }}" method="POST">
-            @csrf
+        <form action="{{ route('kepala.petugas.store') }}" method="POST" autocomplete="off">
+    @csrf
 
-            {{-- NAMA --}}
-            <div class="mb-4">
-                <label class="block mb-1 font-medium text-gray-700">Nama</label>
-                <input type="text" name="name"
-                    value="{{ old('name') }}"
-                    class="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Masukkan nama">
-            </div>
+    {{-- NAMA --}}
+    <div class="mb-4">
+        <label class="block mb-1 font-medium text-gray-700">Nama</label>
+        <input type="text" name="name"
+            value="{{ old('name') }}"
+            autocomplete="off"
+            class="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            placeholder="Masukkan nama">
+    </div>
 
-            {{-- EMAIL --}}
-            <div class="mb-4">
-                <label class="block mb-1 font-medium text-gray-700">Email</label>
-                <input type="email" name="email"
-                    value="{{ old('email') }}"
-                    class="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Masukkan email">
-            </div>
+    {{-- EMAIL --}}
+    <div class="mb-4">
+        <label class="block mb-1 font-medium text-gray-700">Email</label>
+        <input type="email" name="email"
+            value="{{ old('email') }}"
+            autocomplete="off"
+            class="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            placeholder="Masukkan email">
+    </div>
 
-            {{-- PASSWORD --}}
-            <div class="mb-6">
-                <label class="block mb-1 font-medium text-gray-700">Password</label>
-                <input type="password" name="password"
-                    class="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Minimal 6 karakter">
-            </div>
+    {{-- PASSWORD --}}
+    <div class="mb-6">
+        <label class="block mb-1 font-medium text-gray-700">Password</label>
+        <input type="password" name="password"
+            autocomplete="new-password"
+            class="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            placeholder="Minimal 6 karakter">
+    </div>
 
-            {{-- BUTTON --}}
-            <div class="flex justify-between items-center">
-                <a href="{{ route('kepala.petugas.index') }}"
-                   class="text-gray-600 hover:text-gray-800">
-                    ← Kembali
-                </a>
+    {{-- BUTTON --}}
+    <div class="flex justify-between items-center">
+        <a href="{{ route('kepala.petugas.index') }}"
+           class="text-gray-600 hover:text-gray-800">
+            ← Kembali
+        </a>
 
-                <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
-                    Simpan
-                </button>
-            </div>
-
-        </form>
+        <button type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
+            Simpan
+        </button>
+    </div>
+</form>
 
     </div>
 
