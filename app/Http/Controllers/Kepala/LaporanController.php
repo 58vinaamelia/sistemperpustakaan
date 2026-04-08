@@ -3,29 +3,34 @@
 namespace App\Http\Controllers\Kepala;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Models\Anggota\Pinjambuku;
+use App\Models\Anggota\PinjamBuku;
 
 class LaporanController extends \Illuminate\Routing\Controller
 {
     public function index(Request $request)
-    {
-        // validasi input tanggal
-        $request->validate([
-            'dari' => 'nullable|date',
-            'sampai' => 'nullable|date|after_or_equal:dari',
-        ]);
+{
+    $query = PinjamBuku::with(['user', 'buku']);
 
-        $peminjaman = Pinjambuku::with(['user', 'buku'])
-            ->when($request->dari, function ($query) use ($request) {
-                $query->whereDate('tanggal_pinjam', '>=', $request->dari);
-            })
-            ->when($request->sampai, function ($query) use ($request) {
-                $query->whereDate('tanggal_pinjam', '<=', $request->sampai);
-            })
-            ->orderBy('tanggal_pinjam', 'desc') // urut terbaru
-            ->get();
+    // FILTER BULAN (FIX)
+    if ($request->filled('bulan')) {
+        $bulan = explode('-', $request->bulan); // [2026, 01]
 
-        return view('pages.kepala.laporan.index', compact('peminjaman'));
+        $query->whereYear('tanggal_pinjam', $bulan[0])
+              ->whereMonth('tanggal_pinjam', $bulan[1]);
     }
+
+    // FILTER RANGE TANGGAL (FIX)
+    if ($request->filled('dari') && $request->filled('sampai')) {
+        $query->whereBetween('tanggal_pinjam', [
+            $request->dari,
+            $request->sampai
+        ]);
+    }
+
+    $peminjaman = $query->orderBy('tanggal_pinjam', 'desc')
+                        ->paginate(10);
+
+    return view('pages.kepala.laporan.index', compact('peminjaman'));
+}
+
 }

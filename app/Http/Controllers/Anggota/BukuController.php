@@ -14,16 +14,29 @@ class BukuController extends \Illuminate\Routing\Controller
     {
         $search = $request->search;
 
-        $buku = Buku::when($search, function ($query, $search) {
-            $query->where('judul', 'like', "%$search%")
-                  ->orWhere('pengarang', 'like', "%$search%");
-        })->get();
+        $query = Buku::when($search, function ($q, $search) {
+            $q->where(function ($sub) use ($search) {
+                $sub->where('judul', 'like', "%$search%")
+                    ->orWhere('pengarang', 'like', "%$search%");
+            });
+        });
 
-        // 🔥 TAMBAHAN: CEK STATUS DIPINJAM
+        // 🔥 FITUR TAMPIL 6 / SEMUA
+        if ($request->lihat_semua) {
+            $buku = $query->latest()->get();
+        } else {
+            $buku = $query->latest()->limit(6)->get();
+        }
+
+        // 🔥 AMBIL SEMUA BUKU YANG SEDANG DIPINJAM USER SEKALI QUERY
+        $bukuDipinjam = Pinjambuku::where('user_id', Auth::id())
+            ->where('status', 'dipinjam')
+            ->pluck('buku_id')
+            ->toArray();
+
+        // 🔥 SET FLAG
         foreach ($buku as $item) {
-            $item->sedang_dipinjam = Pinjambuku::where('buku_id', $item->id)
-                ->where('status', 'dipinjam')
-                ->exists();
+            $item->dipinjam_sendiri = in_array($item->id, $bukuDipinjam);
         }
 
         return view('pages.anggota.buku.index', compact('buku'));
@@ -51,15 +64,26 @@ class BukuController extends \Illuminate\Routing\Controller
     {
         $buku = Buku::findOrFail($id);
 
+        // ❗ CEK SUDAH PINJAM / PENDING
         $cek = Pinjambuku::where('user_id', Auth::id())
             ->where('buku_id', $id)
-            ->where('status', 'dipinjam')
+            ->whereIn('status', ['dipinjam', 'pending'])
             ->exists();
 
         if ($cek) {
             return back()->with('error', 'Kamu sudah meminjam buku ini');
         }
 
+        // ❗ CEK SEDANG DIPINJAM ORANG LAIN
+        $dipinjam = Pinjambuku::where('buku_id', $id)
+            ->where('status', 'dipinjam')
+            ->exists();
+
+        if ($dipinjam) {
+            return back()->with('error', 'Buku sedang dipinjam orang lain');
+        }
+
+        // ❗ CEK STOK
         if ($buku->stok > 0) {
 
             Pinjambuku::create([

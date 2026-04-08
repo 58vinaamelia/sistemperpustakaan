@@ -3,6 +3,7 @@
 @section('title', 'Data Anggota')
 
 @section('content')
+<div class="container my-5">
 <div class="bg-white p-5 rounded-xl shadow-sm">
     <h4 class="text-lg font-bold mb-4">Data Anggota</h4>
 

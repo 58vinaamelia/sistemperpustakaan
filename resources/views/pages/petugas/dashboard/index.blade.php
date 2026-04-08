@@ -34,7 +34,6 @@
             </div>
         </div>
 
-
         <div class="bg-white rounded-xl shadow-sm flex items-center gap-4 px-5 py-4 w-60">
             <div class="bg-blue-100 p-3 rounded-full">
                 <i class="ti ti-book text-blue-500"></i>
@@ -46,7 +45,7 @@
         </div>
     </div>
 
-    <!-- TABLE PEMINJAMAN -->
+    <!-- TABLE -->
     <div class="bg-white rounded-xl shadow p-6 mt-4 mb-6 flex-1 flex flex-col">
         <h5 class="font-semibold mb-4">Semua Data Peminjaman</h5>
 
@@ -70,76 +69,55 @@
                         <td>{{ $item->tanggal_pinjam }}</td>
                         <td>{{ $item->tanggal_jatuh_tempo }}</td>
 
-                        <!-- STATUS (SUDAH FIX) -->
+                        <!-- STATUS -->
                         <td>
                             @php
-                                $status = strtolower(trim($item->status ?? ''));
-
-                                if ($status === '' || $status === null) {
-                                    $status = 'pending';
-                                }
+                                $status = strtolower(trim($item->status ?? 'pending'));
 
                                 switch ($status) {
                                     case 'pending':
                                         $label = 'Pending';
-                                        $bgColor = 'bg-orange-100';
-                                        $textColor = 'text-orange-600';
+                                        $bg = 'bg-orange-100 text-orange-600';
                                         break;
-
                                     case 'dipinjam':
                                         $label = 'Dipinjam';
-                                        $bgColor = 'bg-blue-100';
-                                        $textColor = 'text-blue-600';
+                                        $bg = 'bg-blue-100 text-blue-600';
                                         break;
-
                                     case 'ditolak':
                                         $label = 'Ditolak';
-                                        $bgColor = 'bg-red-100';
-                                        $textColor = 'text-red-600';
+                                        $bg = 'bg-red-100 text-red-600';
                                         break;
-
                                     case 'selesai':
                                         $label = 'Selesai';
-                                        $bgColor = 'bg-green-100';
-                                        $textColor = 'text-green-600';
+                                        $bg = 'bg-green-100 text-green-600';
                                         break;
-
                                     case 'telat':
                                         $label = 'Telat';
-                                        $bgColor = 'bg-yellow-100';
-                                        $textColor = 'text-yellow-600';
+                                        $bg = 'bg-yellow-100 text-yellow-600';
                                         break;
-
                                     default:
-                                        $label = ucfirst($item->status ?? 'Tidak diketahui');
-                                        $bgColor = 'bg-gray-100';
-                                        $textColor = 'text-gray-600';
-                                        break;
+                                        $label = ucfirst($status);
+                                        $bg = 'bg-gray-100 text-gray-600';
                                 }
                             @endphp
 
-                            <span class="{{ $bgColor }} {{ $textColor }} px-3 py-1 rounded-full text-xs">
+                            <span class="{{ $bg }} px-3 py-1 rounded-full text-xs">
                                 {{ $label }}
                             </span>
                         </td>
 
-                        <!-- AKSI (TIDAK DIUBAH) -->
+                        <!-- AKSI -->
                         <td class="py-2">
-                            <div class="flex justify-center items-center gap-2">
-
-                                <!-- DELETE -->
-                                <form action="{{ route('petugas.peminjaman.destroy', $item->id) }}"
-                                      method="POST"
-                                      onsubmit="return confirm('Yakin hapus data?')"
-                                      class="inline-block">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                            class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-1 rounded border border-red-700 shadow-sm transition">
-                                        Delete
-                                    </button>
-                                </form>
-                            </div>
+                            <form action="{{ route('petugas.peminjaman.destroy', $item->id) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Yakin hapus data?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded">
+                                    Delete
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     @empty
@@ -151,25 +129,15 @@
             </table>
         </div>
 
-        <!-- PAGINASI -->
-        <div class="mt-4 flex justify-between">
-            @if ($peminjaman->onFirstPage())
-                <span class="px-4 py-2 text-gray-400 border rounded cursor-not-allowed">« Previous</span>
-            @else
-                <a href="{{ $peminjaman->previousPageUrl() }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">« Previous</a>
-            @endif
-
-            @if ($peminjaman->hasMorePages())
-                <a href="{{ $peminjaman->nextPageUrl() }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Next »</a>
-            @else
-                <span class="px-4 py-2 text-gray-400 border rounded cursor-not-allowed">Next »</span>
-            @endif
+        <!-- PAGINATION -->
+        <div class="mt-4">
+            {{ $peminjaman->links() }}
         </div>
     </div>
 
 </div>
 
-<!-- SCRIPT SEARCH -->
+<!-- SEARCH AUTO SUBMIT -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     let input = document.querySelector('input[name="search"]');

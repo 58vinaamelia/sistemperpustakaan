@@ -12,33 +12,34 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil input pencarian
         $search = $request->input('search');
 
-        // Total anggota
+        // TOTAL DATA
         $totalAnggota = User::where('role', 'anggota')->count();
-
-        // Total buku
         $totalBuku = Buku::count();
-
-        // Total denda
         $totalDenda = Pinjambuku::sum('denda');
 
-        // Ambil data peminjaman, dengan relasi user & buku, search & pagination
-        $peminjaman = Pinjambuku::with(['user', 'buku'])
-            ->when($search, function ($query, $search) {
-                $query->whereHas('user', function ($q) use ($search) {
-                    $q->where('name', 'like', "%$search%");
-                })
-                ->orWhereHas('buku', function ($q) use ($search) {
-                    $q->where('judul', 'like', "%$search%");
+        // QUERY DASAR
+        $query = Pinjambuku::with(['user', 'buku'])
+            ->when($search, function ($q, $search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->whereHas('user', function ($u) use ($search) {
+                        $u->where('name', 'like', "%$search%");
+                    })
+                    ->orWhereHas('buku', function ($b) use ($search) {
+                        $b->where('judul', 'like', "%$search%");
+                    });
                 });
             })
-            ->orderBy('tanggal_pinjam', 'desc')
-            ->paginate(10)   // <-- 10 data per halaman
-            ->withQueryString(); // <-- biar search tetap di url saat pindah halaman
+            ->orderBy('tanggal_pinjam', 'desc');
 
-        // Kirim ke view
+        // 🔥 LOGIC 5 DATA ATAU SEMUA
+        if ($request->lihat_semua) {
+            $peminjaman = $query->paginate(10)->withQueryString(); // banyak + pagination
+        } else {
+            $peminjaman = $query->paginate(5)->withQueryString(); // default cuma 5
+        }
+
         return view('pages.petugas.dashboard.index', compact(
             'totalAnggota',
             'totalBuku',

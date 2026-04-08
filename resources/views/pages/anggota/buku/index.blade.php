@@ -39,24 +39,53 @@
                 {{ $item->judul }}
             </h6>
 
-            <!-- STATUS (FIX) -->
-            @if($item->sedang_dipinjam)
-                <span class="badge bg-danger mb-2">Sedang Dipinjam</span>
-            @else
-                <span class="badge bg-success mb-2">Tersedia</span>
-            @endif
+            <!-- STATUS -->
+            <div class="mb-2">
+                @if($item->dipinjam_sendiri)
+                    <span class="badge bg-primary">
+                        Sedang Kamu Pinjam
+                    </span>
+                @else
+                    <span class="badge bg-success">
+                        Tersedia
+                    </span>
+                @endif
+            </div>
 
             <!-- BUTTON -->
             <a href="{{ route('anggota.buku.detail', $item->id) }}"
-               class="btn btn-sm text-white"
-               style="background:#4e63c9;">
-               Detail
+                class="btn btn-sm text-white w-100"
+                style="background:#4e63c9;">
+                Detail
             </a>
+
 
         </div>
     @empty
         <p class="text-muted">Buku tidak ditemukan 😢</p>
     @endforelse
+
+</div>
+
+<!-- 🔥 TOMBOL LIHAT SEMUA -->
+<div class="mt-4 text-center">
+
+    @if(!request('lihat_semua'))
+        <a href="{{ route('anggota.buku.index', [
+                'lihat_semua' => 1,
+                'search' => request('search')
+            ]) }}"
+           class="btn btn-outline-primary">
+            Lihat Semua
+        </a>
+    @else
+        <a href="{{ route('anggota.buku.index', [
+                'search' => request('search')
+            ]) }}"
+           class="btn btn-outline-secondary">
+            Tampilkan lebih sedikit
+        </a>
+    @endif
 
 </div>
 

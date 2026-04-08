@@ -15,7 +15,7 @@
 </div>
 
 <!-- SEARCH -->
-<form action="{{ route('petugas.buku.index') }}" method="GET">
+<form action="{{ route('kepala.buku.index') }}" method="GET">
     <div class="mb-4" style="max-width:400px;">
         <div class="input-group">
             <span class="input-group-text border-0 bg-light">🔍</span>
@@ -26,52 +26,77 @@
     </div>
 </form>
 
-<!-- CARDS -->
-<div class="d-flex flex-wrap justify-content-start gap-4">
+<!-- 🔥 GRID -->
+<div class="row">
 
     @forelse ($buku as $item)
-        <div class="text-center shadow rounded p-3"
-             style="background:#f5f5f5; width:170px; transition:0.3s;"
-             onmouseover="this.style.transform='scale(1.05)'"
-             onmouseout="this.style.transform='scale(1)'">
+        <div class="col-md-2 col-sm-4 col-6 mb-4"> {{-- 6 per baris desktop --}}
 
-            <!-- FOTO -->
-            <div class="d-flex justify-content-center mb-2">
-                <img src="{{ $item->foto ? asset('storage/'.$item->foto) : asset('images/no-image.png') }}"
-                    style="width:130px; height:180px; object-fit:cover; border-radius:6px;">
+            <div class="text-center shadow rounded p-3 h-100"
+                 style="background:#f5f5f5; transition:0.3s;"
+                 onmouseover="this.style.transform='scale(1.05)'"
+                 onmouseout="this.style.transform='scale(1)'">
+
+                <!-- FOTO -->
+                <div class="d-flex justify-content-center mb-2">
+                    <img src="{{ $item->foto ? asset('storage/'.$item->foto) : asset('images/no-image.png') }}"
+                        style="width:100%; max-width:120px; height:170px; object-fit:cover; border-radius:6px;">
+                </div>
+
+                <!-- JUDUL -->
+                <h6 class="mb-1 text-truncate" style="font-size:13px;">
+                    {{ $item->judul }}
+                </h6>
+
+                <!-- STOK -->
+                <p class="mb-1" style="font-size:12px;">
+                    Stok: <strong>{{ $item->stok }}</strong>
+                </p>
+
+                <!-- STATUS -->
+                <p class="mb-2" style="font-size:12px;">
+                    @if($item->stok > 0)
+                        <span class="text-success">Tersedia</span>
+                    @else
+                        <span class="text-danger">Habis</span>
+                    @endif
+                </p>
+
+                <!-- DETAIL -->
+                <a href="{{ route('kepala.buku.show', $item->id) }}"
+                   class="btn btn-sm text-white"
+                   style="background:#4e63c9; width:100%;">
+                    Detail
+                </a>
+
             </div>
 
-            <!-- JUDUL -->
-            <h6 class="mb-1 text-truncate" style="font-size:13px; max-width:130px;">
-                {{ $item->judul }}
-            </h6>
-
-            <!-- STOK -->
-            <p class="mb-1" style="font-size:12px;">
-                Stok: <strong>{{ $item->stok }}</strong>
-            </p>
-
-            <!-- STATUS -->
-            <p class="mb-2" style="font-size:12px;">
-                @if($item->stok > 0)
-                    <span class="text-success">Tersedia</span>
-                @else
-                    <span class="text-danger">Habis</span>
-                @endif
-            </p>
-
-            <!-- BUTTON DETAIL SAJA -->
-            <a href="{{ route('kepala.buku.show', $item->id) }}"
-               class="btn btn-sm text-white"
-               style="background:#4e63c9; width:100%;">
-                Detail
-            </a>
-
         </div>
-
     @empty
         <p class="text-muted">Buku tidak ditemukan 😢</p>
     @endforelse
+
+</div>
+
+<!-- 🔥 LIHAT SEMUA -->
+<div class="mt-4 text-center">
+
+    @if(!request('lihat_semua'))
+        <a href="{{ route('kepala.buku.index', [
+                'lihat_semua' => 1,
+                'search' => request('search')
+            ]) }}"
+           class="btn btn-primary">
+            Lihat Semua
+        </a>
+    @else
+        <a href="{{ route('kepala.buku.index', [
+                'search' => request('search')
+            ]) }}"
+           class="btn btn-secondary">
+            Tampilkan Lebih Sedikit
+        </a>
+    @endif
 
 </div>
 

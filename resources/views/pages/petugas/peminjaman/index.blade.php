@@ -4,9 +4,9 @@
 
 @section('content')
 
-<div class="bg-white p-5 rounded-xl shadow-sm">
+<div class="container my-5">
 
-    <h4 class="text-lg font-bold mb-4">Konfirmasi Peminjaman</h4>
+    <h4 class="text-lg font-bold mb-4 r">Konfirmasi Peminjaman</h4>
 
     {{-- NOTIFIKASI --}}
     @if(session('success'))
@@ -16,7 +16,8 @@
     @endif
 
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-center border border-gray-200">
+
+        <table class="w-full text-sm text-center border border-gray-200 bg-white"> {{-- 🔥 tabel putih --}}
 
             {{-- HEADER --}}
             <thead style="background:#f1f1f1;">
@@ -36,13 +37,12 @@
             @forelse($peminjaman as $item)
                 @php
                     $status = strtolower(trim($item->status ?? ''));
-
                     if ($status === '' || $status === null) {
                         $status = 'pending';
                     }
                 @endphp
 
-                <tr>
+                <tr class="border-top" style="background:white;"> {{-- 🔥 kolom putih --}}
 
                     <td class="py-3">{{ $item->user->name ?? '-' }}</td>
                     <td>{{ $item->buku->judul ?? '-' }}</td>
@@ -112,22 +112,23 @@
                         @else
                             <span style="color:gray; font-style:italic;">Sudah diproses</span>
                         @endif
- 
+
                     </td>
 
                 </tr>
 
             @empty
-                <tr>
-                    <td colspan="6">Tidak ada data peminjaman</td>
+                <tr style="background:white;">
+                    <td colspan="6" class="py-3">Tidak ada data peminjaman</td>
                 </tr>
             @endforelse
 
             </tbody>
         </table>
+
     </div>
 
-    <div style="margin-top:15px;">
+    <div class="mt-4 d-flex justify-content-center">
         {{ $peminjaman->links() }}
     </div>
 

@@ -12,9 +12,16 @@ class BukuController extends \Illuminate\Routing\Controller
     {
         $search = $request->search;
 
-        $buku = Buku::when($search, function ($query, $search) {
-            return $query->where('judul', 'like', "%$search%");
-        })->latest()->get();
+        $query = Buku::when($search, function ($q, $search) {
+            return $q->where('judul', 'like', "%$search%");
+        })->latest();
+
+        // 🔥 LOGIC: 6 DATA ATAU SEMUA
+        if ($request->lihat_semua) {
+            $buku = $query->get(); // tampil semua
+        } else {
+            $buku = $query->limit(6)->get(); // default 6
+        }
 
         return view('pages.kepala.buku.index', compact('buku'));
     }
