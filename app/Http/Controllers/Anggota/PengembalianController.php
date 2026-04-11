@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Anggota;
 use Illuminate\Http\Request;
 use App\Models\Anggota\Pinjambuku;
 use App\Models\Anggota\Pengembalian;
-use App\Http\Controllers\Controller;
+use App\Models\Anggota\Buku;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -31,14 +31,14 @@ class PengembalianController extends \Illuminate\Routing\Controller
     {
         $peminjaman = Pinjambuku::with('buku')
             ->where('user_id', Auth::id())
-            ->where('status', 'dipinjam') // 🔥 HARUS KECIL
+            ->where('status', 'dipinjam')
             ->get();
 
         return view('pages.anggota.pengembalian.create', compact('peminjaman'));
     }
 
     // ==========================
-    // STORE
+    // STORE (PENGEMBALIAN)
     // ==========================
     public function store(Request $request)
     {
@@ -47,9 +47,10 @@ class PengembalianController extends \Illuminate\Routing\Controller
             'tanggal_kembali' => 'required|date',
         ]);
 
-        $pinjam = Pinjambuku::where('buku_id', $request->buku_id)
+        $pinjam = Pinjambuku::with('buku')
+            ->where('buku_id', $request->buku_id)
             ->where('user_id', Auth::id())
-            ->where('status', 'dipinjam') // 🔥 HARUS KONSISTEN
+            ->where('status', 'dipinjam')
             ->first();
 
         if (!$pinjam) {
@@ -57,7 +58,7 @@ class PengembalianController extends \Illuminate\Routing\Controller
         }
 
         $tglKembali = Carbon::parse($request->tanggal_kembali);
-        $tglTempo = Carbon::parse($pinjam->tanggal_jatuh_tempo);
+        $tglTempo   = Carbon::parse($pinjam->tanggal_jatuh_tempo);
 
         $denda = 0;
         if ($tglKembali->gt($tglTempo)) {
@@ -65,7 +66,7 @@ class PengembalianController extends \Illuminate\Routing\Controller
             $denda = $hariTelat * 1000;
         }
 
-        // ✅ SIMPAN PENGEMBALIAN
+        // ✅ SIMPAN DATA PENGEMBALIAN
         Pengembalian::create([
             'nama' => Auth::user()->name,
             'user_id' => Auth::id(),
@@ -77,9 +78,19 @@ class PengembalianController extends \Illuminate\Routing\Controller
             'status' => 'menunggu',
         ]);
 
-        // 🔥 FIX PENTING
+        // ==========================
+        // 🔥 TAMBAH STOK BUKU
+        // ==========================
+        if ($pinjam->buku) {
+            $pinjam->buku->stok += 1;
+            $pinjam->buku->save();
+        }
+
+        // ==========================
+        // UPDATE STATUS PINJAM
+        // ==========================
         $pinjam->update([
-            'status' => 'menunggu' // ❌ JANGAN "Menunggu Konfirmasi"
+            'status' => 'menunggu'
         ]);
 
         return redirect()->route('anggota.pengembalian.index')

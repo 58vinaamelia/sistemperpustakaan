@@ -159,8 +159,15 @@ Route::prefix('kepala')->name('kepala.')->middleware('auth')->group(function() {
         ->name('dashboard');
 
     Route::get('/laporan', [LaporanController::class, 'index'])
-        ->name('laporan.index');
+    ->name('laporan.index');
 
+// 🔥 TAMBAHKAN INI
+Route::get('/laporan/cetak', [LaporanController::class, 'cetak'])
+    ->name('laporan.cetak');
+
+Route::get('/laporan/pdf', [LaporanController::class, 'pdf'])
+    ->name('laporan.pdf');
+    
     // 📚 BUKU (VIEW ONLY)
     Route::get('/buku', [KepalaBukuController::class,'index'])->name('buku.index');
     Route::get('/buku/{id}', [KepalaBukuController::class,'show'])->name('buku.show');

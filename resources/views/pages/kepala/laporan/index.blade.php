@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="mt-8 px-6"> {{-- 🔥 FIX: kasih jarak ke footer --}}
+<div class="mt-8 px-6">
 
     {{-- HEADER --}}
     <div class="mb-6 flex justify-between items-center">
@@ -17,13 +17,22 @@
             </p>
         </div>
 
-        <div class="text-sm text-blue-500 text-right">
-            @if(request('bulan'))
-                Bulan: {{ request('bulan') }}
-            @elseif(request('dari') && request('sampai'))
-                {{ request('dari') }} s/d {{ request('sampai') }}
-            @endif
-        </div>
+        {{-- 🔥 TOMBOL CETAK & PDF --}}
+       <div class="flex gap-3">
+
+    {{-- CETAK --}}
+    <a href="{{ route('kepala.laporan.cetak', request()->all()) }}" target="_blank"
+        class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-800 px-5 py-2 rounded-xl shadow text-sm font-semibold border border-green-300">
+        🖨️ <span>Cetak</span>
+    </a>
+
+    {{-- PDF --}}
+    <a href="{{ route('kepala.laporan.pdf', request()->all()) }}"
+        class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl shadow-md text-sm font-semibold">
+        📄 <span>PDF</span>
+    </a>
+
+</div>
     </div>
 
     {{-- FILTER --}}
@@ -62,7 +71,7 @@
     </div>
 
     {{-- TABLE --}}
-    <div class="bg-white rounded-2xl shadow-sm border overflow-hidden mb-10"> {{-- 🔥 tambah margin bawah juga --}}
+    <div class="bg-white rounded-2xl shadow-sm border overflow-hidden mb-10">
 
         <div class="px-6 py-4 border-b flex justify-between items-center">
             <h2 class="text-lg font-semibold text-gray-700">
@@ -85,6 +94,7 @@
                         <th class="px-6 py-3">Tgl Pinjam</th>
                         <th class="px-6 py-3">Jatuh Tempo</th>
                         <th class="px-6 py-3">Tgl Kembali</th>
+                        <th class="px-6 py-3 text-center">Denda</th>
                         <th class="px-6 py-3 text-center">Status</th>
                     </tr>
                 </thead>
@@ -97,9 +107,18 @@
                             ? strtotime($item->tanggal_pinjam . ' +7 days')
                             : null;
 
-                        $isTerlambat = $item->status == 'dipinjam'
-                            && $jatuhTempo
-                            && time() > $jatuhTempo;
+                        $tanggalCek = $item->tanggal_kembali
+                            ? strtotime($item->tanggal_kembali)
+                            : time();
+
+                        $isTerlambat = $jatuhTempo && $tanggalCek > $jatuhTempo;
+
+                        $denda = 0;
+
+                        if ($isTerlambat) {
+                            $hariTelat = floor(($tanggalCek - $jatuhTempo) / (60 * 60 * 24));
+                            $denda = $hariTelat * 1000;
+                        }
                     @endphp
 
                     <tr class="hover:bg-gray-50">
@@ -128,31 +147,35 @@
                             {{ $item->tanggal_kembali ? date('d M Y', strtotime($item->tanggal_kembali)) : '-' }}
                         </td>
 
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-6 py-4 text-center text-red-600 font-semibold">
+                            @if($denda > 0)
+                                Rp {{ number_format($denda, 0, ',', '.') }}
+                            @else
+                                -
+                            @endif
+                        </td>
 
+                        <td class="px-6 py-4 text-center">
                             @if($isTerlambat)
                                 <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">
                                     Terlambat
                                 </span>
-
                             @elseif($item->status == 'dipinjam')
                                 <span class="bg-yellow-300 text-yellow-900 px-3 py-1 rounded-full text-xs">
                                     Dipinjam
                                 </span>
-
                             @else
                                 <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">
                                     Dikembalikan
                                 </span>
                             @endif
-
                         </td>
 
                     </tr>
 
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-8 text-gray-400">
+                        <td colspan="8" class="text-center py-8 text-gray-400">
                             Tidak ada data
                         </td>
                     </tr>

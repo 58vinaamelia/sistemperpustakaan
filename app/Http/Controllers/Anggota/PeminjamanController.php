@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Anggota;
 
 use App\Models\Anggota\Pinjambuku;
+use App\Models\Anggota\Buku;
 use Illuminate\Support\Facades\Auth;
 
 class PeminjamanController extends \Illuminate\Routing\Controller
@@ -12,7 +13,6 @@ class PeminjamanController extends \Illuminate\Routing\Controller
      */
     public function index()
     {
-        // Ambil hanya data milik anggota login, termasuk relasi buku
         $peminjaman = Pinjambuku::with('buku')
             ->where('user_id', Auth::id())
             ->latest()
@@ -26,7 +26,6 @@ class PeminjamanController extends \Illuminate\Routing\Controller
      */
     public function show($id)
     {
-        // Pastikan hanya bisa melihat miliknya sendiri
         $data = Pinjambuku::with('buku')
             ->where('user_id', Auth::id())
             ->findOrFail($id);
@@ -35,17 +34,26 @@ class PeminjamanController extends \Illuminate\Routing\Controller
     }
 
     /**
-     * 🗑 Hapus peminjaman
+     * 🗑 Hapus peminjaman + kembalikan stok
      */
     public function destroy($id)
     {
-        // Pastikan hanya bisa menghapus miliknya sendiri
-        $data = Pinjambuku::where('user_id', Auth::id())
+        $data = Pinjambuku::with('buku')
+            ->where('user_id', Auth::id())
             ->findOrFail($id);
+
+        // ✅ CEK: kalau belum dikembalikan, stok dikembalikan
+        if ($data->status != 'dikembalikan') {
+
+            if ($data->buku) {
+                $data->buku->stok += 1;
+                $data->buku->save();
+            }
+        }
 
         $data->delete();
 
         return redirect()->route('anggota.peminjaman.index')
-            ->with('success', 'Data berhasil dihapus');
+            ->with('success', 'Data berhasil dihapus & stok dikembalikan');
     }
 }
