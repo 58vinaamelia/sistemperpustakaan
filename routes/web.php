@@ -90,10 +90,15 @@ Route::prefix('anggota')->name('anggota.')->middleware('auth')->group(function()
 
     Route::get('/buku', [BukuController::class,'index'])->name('buku.index');
     Route::get('/buku/{id}', [BukuController::class,'detail'])->name('buku.detail');
-    Route::get('/buku/{id}/pinjam', [BukuController::class,'formPinjam'])->name('buku.pinjam.form');
-    Route::post('/buku/{id}/pinjam', [BukuController::class,'pinjam'])->name('buku.pinjam.store');
 
-    Route::get('/peminjaman', [PinjambukuController::class, 'index'])->name('peminjaman.index');
+    Route::get('/buku/{id}/pinjam', [BukuController::class,'formPinjam'])
+        ->name('buku.pinjam.form');
+
+    Route::post('/buku/{id}/pinjam', [BukuController::class,'pinjam'])
+        ->name('buku.pinjam.store');
+
+    Route::get('/peminjaman', [PinjambukuController::class, 'index'])
+        ->name('peminjaman.index');
 
     Route::get('/pengembalian', [AnggotaPengembalianController::class, 'index'])->name('pengembalian.index');
     Route::get('/pengembalian/create', [AnggotaPengembalianController::class, 'create'])->name('pengembalian.create');
@@ -161,13 +166,12 @@ Route::prefix('kepala')->name('kepala.')->middleware('auth')->group(function() {
     Route::get('/laporan', [LaporanController::class, 'index'])
     ->name('laporan.index');
 
-// 🔥 TAMBAHKAN INI
-Route::get('/laporan/cetak', [LaporanController::class, 'cetak'])
+    Route::get('/laporan/cetak', [LaporanController::class, 'cetak'])
     ->name('laporan.cetak');
 
-Route::get('/laporan/pdf', [LaporanController::class, 'pdf'])
+    Route::get('/laporan/pdf', [LaporanController::class, 'pdf'])
     ->name('laporan.pdf');
-    
+
     // 📚 BUKU (VIEW ONLY)
     Route::get('/buku', [KepalaBukuController::class,'index'])->name('buku.index');
     Route::get('/buku/{id}', [KepalaBukuController::class,'show'])->name('buku.show');

@@ -12,16 +12,15 @@
 
         <!-- PROFILE -->
         <div class="flex flex-col items-center pt-2 pb-4">
-            @if(Auth::user()->photo)
-                <div class="w-20 h-20 mb-3 rounded-full overflow-hidden">
+           @if(Auth::user()->photo)
+                <div class="w-20 h-20 mb-3 rounded-full overflow-hidden flex-none">
                     <img src="{{ asset('storage/' . Auth::user()->photo) }}"
-                         class="w-full h-full object-cover">
+                        class="w-full h-full object-cover object-center">
                 </div>
             @else
-                <div class="w-20 h-20 mb-3 rounded-full bg-purple-600 flex items-center justify-center">
-                    <span class="text-white text-2xl font-bold">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                    </span>
+                <div class="w-20 h-20 mb-3 rounded-full bg-purple-600 flex items-center justify-center flex-none">
+                    <img src="{{ asset('storage/tumpukanbuku.jpg') }}"
+                        style="width:60px; height:60px; object-fit:contain;">
                 </div>
             @endif
 
@@ -31,65 +30,117 @@
         </div>
 
         <!-- MENU -->
-        <nav class="px-4 mt-4">
-            <ul class="space-y-2 text-sm">
+<nav class="px-4 flex-1 flex justify-center items-center">
 
-                @if(Auth::user()->role == 'petugas')
+    <!-- BACKGROUND UNGU -->
+    <div style="
+        background:#6d28d9;
+        border-radius:16px;
+        padding:30px 20px;
+        width:100%;
+        max-width:230px;
+    ">
 
-                {{-- DASHBOARD --}}
-                <li>
-                    <a href="/petugas/dashboard"
-                       class="flex items-center gap-3 px-4 py-2 rounded-lg transition
-                       {{ request()->is('petugas/dashboard') ? 'bg-purple-50 text-purple-700 border-l-4 border-purple-600 font-semibold' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-600' }}">
-                        <i class="ti ti-home text-lg"></i>
-                        Dashboard
-                    </a>
-                </li>
+        <ul style="
+            display:flex;
+            flex-direction:column;
+            gap:20px;
+        ">
 
-                {{-- DATA BUKU --}}
-                <li>
-                    <a href="/petugas/buku"
-                       class="flex items-center gap-3 px-4 py-2 rounded-lg transition
-                       {{ request()->is('petugas/buku*') ? 'bg-purple-50 text-purple-700 border-l-4 border-purple-600 font-semibold' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-600' }}">
-                        <i class="ti ti-book text-lg"></i>
-                        Data Buku
-                    </a>
-                </li>
+            @if(Auth::user()->role == 'petugas')
 
-                {{-- DATA PEMINJAMAN --}}
-                <li>
-                    <a href="/petugas/peminjaman"
-                       class="flex items-center gap-3 px-4 py-2 rounded-lg transition
-                       {{ request()->is('petugas/peminjaman*') ? 'bg-purple-50 text-purple-700 border-l-4 border-purple-600 font-semibold' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-600' }}">
-                        <i class="ti ti-briefcase text-lg"></i>
-                        Data Peminjaman
-                    </a>
-                </li>
+            {{-- DASHBOARD --}}
+            <li>
+                <a href="/petugas/dashboard"
+                class="menu-item {{ request()->is('petugas/dashboard') ? 'active' : '' }}">
+                    <i class="ti ti-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
 
-                {{-- DATA PENGEMBALIAN --}}
-                <li>
-                    <a href="/petugas/pengembalian"
-                       class="flex items-center gap-3 px-4 py-2 rounded-lg transition
-                       {{ request()->is('petugas/pengembalian*') ? 'bg-purple-50 text-purple-700 border-l-4 border-purple-600 font-semibold' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-600' }}">
-                        <i class="ti ti-refresh text-lg"></i>
-                        Data Pengembalian
-                    </a>
-                </li>
+            {{-- DATA BUKU --}}
+            <li>
+                <a href="/petugas/buku"
+                   class="menu-item {{ request()->is('petugas/buku*') ? 'active' : '' }}">
+                    <i class="ti ti-book-filled"></i>
+                    <span>Data Buku</span>
+                </a>
+            </li>
 
-                {{-- DATA ANGGOTA --}}
-                <li>
-                    <a href="/petugas/anggota"
-                       class="flex items-center gap-3 px-4 py-2 rounded-lg transition
-                       {{ request()->is('petugas/anggota*') ? 'bg-purple-50 text-purple-700 border-l-4 border-purple-600 font-semibold' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-600' }}">
-                        <i class="ti ti-users text-lg"></i>
-                        Data Anggota
-                    </a>
-                </li>
+            {{-- DATA PEMINJAMAN --}}
+            <li>
+                <a href="/petugas/peminjaman"
+                   class="menu-item {{ request()->is('petugas/peminjaman*') ? 'active' : '' }}">
+                    <i class="ti ti-clipboard-text"></i>
+                    <span>Data Peminjaman</span>
+                </a>
+            </li>
 
-                @endif
+            {{-- DATA PENGEMBALIAN --}}
+            <li>
+                <a href="/petugas/pengembalian"
+                   class="menu-item {{ request()->is('petugas/pengembalian*') ? 'active' : '' }}">
+                    <i class="ti ti-refresh-dot"></i>
+                    <span>Data Pengembalian</span>
+                </a>
+            </li>
 
-            </ul>
-        </nav>
+            {{-- DATA ANGGOTA --}}
+            <li>
+                <a href="/petugas/anggota"
+                   class="menu-item {{ request()->is('petugas/anggota*') ? 'active' : '' }}">
+                    <i class="ti ti-users"></i>
+                    <span>Data Anggota</span>
+                </a>
+            </li>
+
+            @endif
+
+        </ul>
+
+    </div>
+
+</nav>
+
+<style>
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: white;
+    font-size: 14px;
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+/* ICON STIKER */
+.menu-item i {
+    font-size: 20px;
+    background: rgba(255,255,255,0.2);
+    padding: 6px;
+    border-radius: 8px;
+    color: white;
+}
+
+/* HOVER */
+.menu-item:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+/* ACTIVE */
+.menu-item.active {
+    background: white;
+    color: #6d28d9;
+    font-weight: 600;
+}
+
+.menu-item.active i {
+    background: #6d28d9;
+    color: white;
+}
+</style>
 
     </div>
 

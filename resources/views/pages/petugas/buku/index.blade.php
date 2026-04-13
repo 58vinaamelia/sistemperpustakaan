@@ -11,7 +11,7 @@
 
 <!-- HEADER -->
 <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
-    <h4 class="fw-bold m-0">Daftar Buku</h4>
+    <h4 class="fw-bold m-0">Data Buku</h4> 
     <a href="{{ route('petugas.buku.create') }}"
        class="btn text-white px-3 py-2"
        style="background:#4e63c9;">

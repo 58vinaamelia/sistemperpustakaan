@@ -10,15 +10,14 @@
         <!-- PROFILE -->
         <div class="flex flex-col items-center pt-2 pb-4">
             @if(Auth::user()->photo)
-                <div class="w-20 h-20 mb-3 rounded-full overflow-hidden">
+                <div class="w-20 h-20 mb-3 rounded-full overflow-hidden flex-none">
                     <img src="{{ asset('storage/' . Auth::user()->photo) }}"
-                         class="w-full h-full object-cover">
+                        class="w-full h-full object-cover object-center">
                 </div>
             @else
-                <div class="w-20 h-20 mb-3 rounded-full bg-purple-600 flex items-center justify-center">
-                    <span class="text-white text-2xl font-bold">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                    </span>
+                <div class="w-20 h-20 mb-3 rounded-full bg-purple-600 flex items-center justify-center flex-none">
+                    <img src="{{ asset('storage/tumpukanbuku.jpg') }}"
+                        style="width:60px; height:60px; object-fit:contain;">
                 </div>
             @endif
 
@@ -28,108 +27,155 @@
         </div>
 
         <!-- MENU -->
-        <nav class="px-6 mt-4">
-            <ul class="space-y-1 text-sm">
+        <nav class="px-4 flex-1 flex justify-center items-center">
 
-                @php
-                    $role = strtolower(trim(Auth::user()->role));
-                @endphp
+    <!-- BACKGROUND UNGU -->
+    <div style="
+        background:#6d28d9;
+        border-radius:16px;
+        padding:30px 20px;
+        width:100%;
+        max-width:230px;
+    ">
 
-                {{-- ================= PETUGAS ================= --}}
-                @if($role == 'petugas')
+        <ul style="
+            display:flex;
+            flex-direction:column;
+            gap:20px;
+        ">
 
-                <li>
-                    <a href="/petugas/dashboard"
-                       class="flex items-center gap-3 px-2 py-2 rounded-lg transition
-                       {{ request()->is('petugas/dashboard') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
-                        <i class="ti ti-home text-lg"></i>
-                        Dashboard
-                    </a>
-                </li>
+            @php
+                $role = strtolower(trim(Auth::user()->role));
+            @endphp
 
-                <li>
-                    <a href="/petugas/laporan"
-                       class="flex items-center gap-3 px-2 py-2 rounded-lg transition
-                       {{ request()->is('petugas/laporan*') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
-                        <i class="ti ti-file-report text-lg"></i>
-                        Laporan
-                    </a>
-                </li>
+            {{-- ================= PETUGAS ================= --}}
+            @if($role == 'petugas')
 
-                <li>
-                    <a href="/petugas/petugas/create"
-                       class="flex items-center gap-3 px-2 py-2 rounded-lg transition
-                       {{ request()->is('petugas/petugas/create') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
-                        <i class="ti ti-user-plus text-lg"></i>
-                        Tambah Petugas
-                    </a>
-                </li>
+            <li>
+                <a href="/petugas/dashboard"
+                   class="menu-item {{ request()->is('petugas/dashboard') ? 'active' : '' }}">
+                    <i class="ti ti-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
 
-                <li>
-                    <a href="/petugas/buku"
-                       class="flex items-center gap-3 px-2 py-2 rounded-lg transition
-                       {{ request()->is('petugas/buku*') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
-                        <i class="ti ti-book text-lg"></i>
-                        Data Buku
-                    </a>
-                </li>
+            <li>
+                <a href="/petugas/laporan"
+                   class="menu-item {{ request()->is('petugas/laporan*') ? 'active' : '' }}">
+                    <i class="ti ti-file-report"></i>
+                    <span>Laporan</span>
+                </a>
+            </li>
 
-                <li>
-                    <a href="/petugas/anggota"
-                       class="flex items-center gap-3 px-2 py-2 rounded-lg transition
-                       {{ request()->is('petugas/anggota*') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
-                        <i class="ti ti-users text-lg"></i>
-                        Data Anggota
-                    </a>
-                </li>
+            <li>
+                <a href="/petugas/petugas/create"
+                   class="menu-item {{ request()->is('petugas/petugas/create') ? 'active' : '' }}">
+                    <i class="ti ti-user-plus"></i>
+                    <span>Tambah Petugas</span>
+                </a>
+            </li>
 
-                @endif
+            <li>
+                <a href="/petugas/buku"
+                   class="menu-item {{ request()->is('petugas/buku*') ? 'active' : '' }}">
+                    <i class="ti ti-book"></i>
+                    <span>Data Buku</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="/petugas/anggota"
+                   class="menu-item {{ request()->is('petugas/anggota*') ? 'active' : '' }}">
+                    <i class="ti ti-users"></i>
+                    <span>Data Anggota</span>
+                </a>
+            </li>
+
+            @endif
 
 
-                {{-- ================= KEPALA ================= --}}
-                @if($role == 'kepala')
+            {{-- ================= KEPALA ================= --}}
+            @if($role == 'kepala')
 
-                <li>
-                    <a href="/kepala/dashboard"
-                       class="flex items-center gap-3 px-2 py-2 rounded-lg transition
-                       {{ request()->is('kepala/dashboard') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
-                        <i class="ti ti-home text-lg"></i>
-                        Dashboard
-                    </a>
-                </li>
+            <li>
+                <a href="/kepala/dashboard"
+                   class="menu-item {{ request()->is('kepala/dashboard') ? 'active' : '' }}">
+                    <i class="ti ti-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
 
-                <!-- ✅ LAPORAN (CUMA 1) -->
-                <li>
-                    <a href="/kepala/laporan"
-                       class="flex items-center gap-3 px-2 py-2 rounded-lg transition
-                       {{ request()->is('kepala/laporan*') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
-                        <i class="ti ti-file-report text-lg"></i>
-                        Laporan
-                    </a>
-                </li>
+            <li>
+                <a href="/kepala/laporan"
+                   class="menu-item {{ request()->is('kepala/laporan*') ? 'active' : '' }}">
+                    <i class="ti ti-file-report"></i>
+                    <span>Laporan</span>
+                </a>
+            </li>
 
-                <li>
-                    <a href="{{ route('kepala.petugas.index') }}"
-                    class="flex items-center gap-3 px-2 py-2 rounded-lg transition
-                    {{ request()->is('kepala/petugas') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
+            <li>
+                <a href="{{ route('kepala.petugas.index') }}"
+                   class="menu-item {{ request()->is('kepala/petugas') ? 'active' : '' }}">
+                    <i class="ti ti-users"></i>
+                    <span>Petugas</span>
+                </a>
+            </li>
 
-                        <i class="ti ti-users text-lg"></i>
-                        Petugas
-                    </a>
-                </li>
-                <li>
-                    <a href="/kepala/buku"
-                       class="flex items-center gap-3 px-2 py-2 rounded-lg transition
-                       {{ request()->is('kepala/buku*') ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800' }}">
-                        <i class="ti ti-book text-lg"></i>
-                        Katalog Buku
-                    </a>
-                </li>
+            <li>
+                <a href="/kepala/buku"
+                   class="menu-item {{ request()->is('kepala/buku*') ? 'active' : '' }}">
+                    <i class="ti ti-book"></i>
+                    <span>Katalog Buku</span>
+                </a>
+            </li>
 
-                @endif
+            @endif
 
-            </ul>
-        </nav>
+        </ul>
+
+    </div>
+
+</nav>
+
+<style>
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: white;
+    font-size: 14px;
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+/* ICON STIKER */
+.menu-item i {
+    font-size: 20px;
+    background: rgba(255,255,255,0.2);
+    padding: 6px;
+    border-radius: 8px;
+    color: white;
+}
+
+/* HOVER */
+.menu-item:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+/* ACTIVE */
+.menu-item.active {
+    background: white;
+    color: #6d28d9;
+    font-weight: 600;
+}
+
+.menu-item.active i {
+    background: #6d28d9;
+    color: white;
+}
+</style>
     </div>
 
     <!-- LOGOUT -->

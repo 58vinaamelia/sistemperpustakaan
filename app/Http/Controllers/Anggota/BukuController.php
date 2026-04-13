@@ -61,44 +61,37 @@ class BukuController extends \Illuminate\Routing\Controller
     }
 
     public function pinjam($id)
-    {
-        $buku = Buku::findOrFail($id);
+{
+    $userId = Auth::id();
 
-        // ❗ CEK SUDAH PINJAM / PENDING
-        $cek = Pinjambuku::where('user_id', Auth::id())
-            ->where('buku_id', $id)
-            ->whereIn('status', ['dipinjam', 'pending'])
-            ->exists();
+    $buku = Buku::findOrFail($id);
 
-        if ($cek) {
-            return back()->with('error', 'Kamu sudah meminjam buku ini');
-        }
+    // 🔥 max 3 buku (pending + dipinjam)
+    $jumlahPinjam = Pinjambuku::where('user_id', $userId)
+        ->whereIn('status', ['pending', 'dipinjam'])
+        ->count();
 
-        // ❗ CEK SEDANG DIPINJAM ORANG LAIN
-        $dipinjam = Pinjambuku::where('buku_id', $id)
-            ->where('status', 'dipinjam')
-            ->exists();
-
-        if ($dipinjam) {
-            return back()->with('error', 'Buku sedang dipinjam orang lain');
-        }
-
-        // ❗ CEK STOK
-        if ($buku->stok > 0) {
-
-            Pinjambuku::create([
-                'user_id' => Auth::id(),
-                'nama' => Auth::user()->name,
-                'buku_id' => $buku->id,
-                'tanggal_pinjam' => Carbon::today(),
-                'tanggal_jatuh_tempo' => Carbon::today()->addDays(7),
-                'status' => 'pending'
-            ]);
-
-            return redirect()->route('anggota.peminjaman.index')
-                ->with('success', 'Menunggu konfirmasi petugas');
-        }
-
-        return back()->with('error', 'Stok habis');
+    if ($jumlahPinjam >= 3) {
+        return back()->with('error', 'Maksimal 3 buku!');
     }
+
+    // ❌ stok dicek saja (JANGAN dikurangi dulu)
+    if ($buku->stok <= 0) {
+        return back()->with('error', 'Stok habis!');
+    }
+
+    // ✅ SIMPAN SEBAGAI PENDING (INI KUNCI FIX)
+    Pinjambuku::create([
+        'user_id' => $userId,
+        'nama' => Auth::user()->name,
+        'buku_id' => $buku->id,
+        'tanggal_pinjam' => Carbon::today(),
+        'tanggal_jatuh_tempo' => Carbon::today()->addDays(7),
+        'status' => 'pending'
+    ]);
+
+    return redirect()->route('anggota.peminjaman.index')
+        ->with('success', 'Permintaan pinjam sedang menunggu persetujuan petugas');
+}
+
 }
