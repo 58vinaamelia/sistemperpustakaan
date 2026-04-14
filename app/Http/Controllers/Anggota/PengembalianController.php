@@ -11,9 +11,6 @@ use Carbon\Carbon;
 
 class PengembalianController extends \Illuminate\Routing\Controller
 {
-    // ==========================
-    // INDEX
-    // ==========================
     public function index()
     {
         $pengembalian = Pengembalian::with('buku')
@@ -24,9 +21,6 @@ class PengembalianController extends \Illuminate\Routing\Controller
         return view('pages.anggota.pengembalian.index', compact('pengembalian'));
     }
 
-    // ==========================
-    // FORM CREATE
-    // ==========================
     public function create()
     {
         $peminjaman = Pinjambuku::with('buku')
@@ -37,14 +31,12 @@ class PengembalianController extends \Illuminate\Routing\Controller
         return view('pages.anggota.pengembalian.create', compact('peminjaman'));
     }
 
-    // ==========================
-    // STORE (PENGEMBALIAN)
-    // ==========================
     public function store(Request $request)
     {
         $request->validate([
             'buku_id' => 'required|exists:buku,id',
             'tanggal_kembali' => 'required|date',
+            'kondisi_buku' => 'required'
         ]);
 
         $pinjam = Pinjambuku::with('buku')
@@ -61,12 +53,23 @@ class PengembalianController extends \Illuminate\Routing\Controller
         $tglTempo   = Carbon::parse($pinjam->tanggal_jatuh_tempo);
 
         $denda = 0;
+
+        // denda keterlambatan
         if ($tglKembali->gt($tglTempo)) {
             $hariTelat = $tglTempo->diffInDays($tglKembali);
-            $denda = $hariTelat * 1000;
+            $denda += $hariTelat * 5000;
         }
 
-        // ✅ SIMPAN DATA PENGEMBALIAN
+        // denda kondisi
+        if ($request->kondisi_buku == 'rusak') {
+            $denda += 20000;
+        }
+
+        if ($request->kondisi_buku == 'hilang') {
+            $denda += 50000;
+        }
+
+        // SIMPAN PENGEMBALIAN
         Pengembalian::create([
             'nama' => Auth::user()->name,
             'user_id' => Auth::id(),
@@ -75,25 +78,29 @@ class PengembalianController extends \Illuminate\Routing\Controller
             'tanggal_jatuh_tempo' => $pinjam->tanggal_jatuh_tempo,
             'tanggal_kembali' => $tglKembali,
             'denda' => $denda,
+            'kondisi_buku' => $request->kondisi_buku,
             'status' => 'menunggu',
         ]);
 
-        // ==========================
-        // 🔥 TAMBAH STOK BUKU
-        // ==========================
-        if ($pinjam->buku) {
-            $pinjam->buku->stok += 1;
-            $pinjam->buku->save();
+        // tambah stok jika tidak hilang
+        if ($request->kondisi_buku != 'hilang' && $pinjam->buku) {
+            $pinjam->buku->increment('stok');
         }
 
-        // ==========================
-        // UPDATE STATUS PINJAM
-        // ==========================
+        // ubah status pinjaman
         $pinjam->update([
             'status' => 'menunggu'
         ]);
 
-        return redirect()->route('anggota.pengembalian.index')
-            ->with('success', 'Pengembalian dikirim, menunggu konfirmasi petugas.');
+        $buku = Buku::find($pinjam->buku_id);
+
+        return view('pages.anggota.pengembalian.struk', [
+            'nama' => Auth::user()->name,
+            'judul' => $buku?->judul ?? '-',
+            'tanggal_pinjam' => $pinjam->tanggal_pinjam,
+            'tanggal_kembali' => $tglKembali,
+            'denda' => $denda,
+            'kondisi_buku' => $request->kondisi_buku
+        ]);
     }
 }

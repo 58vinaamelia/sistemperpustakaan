@@ -8,7 +8,6 @@
 
     <div style="background:#d9d9d9; padding:30px; border-radius:10px;">
 
-        {{-- ERROR --}}
         @if ($errors->any())
             <div class="alert alert-danger">
                 {{ $errors->first() }}
@@ -33,65 +32,49 @@
 
             <!-- JUDUL BUKU -->
             <div class="mb-3">
-    <label class="form-label">Judul Buku</label>
+                <label class="form-label">Judul Buku</label>
 
-    <div class="position-relative">
-
-        <select name="buku_id"
-                class="form-control pe-5"
-                size="1"
-                onfocus="this.size=5;"
-                onblur="this.size=1;"
-                onchange="this.size=1; this.blur();"
-                required>
-
-            <option value="" disabled selected>Pilih buku yang dikembalikan</option>
-
-            @foreach($peminjaman as $item)
-                <option value="{{ $item->buku_id }}">
-                    {{ $item->buku->judul }}
-                    (Pinjam: {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') }})
-                </option>
-            @endforeach
-
-        </select>
-
-        <!-- ICON -->
-        <span style="
-            position:absolute;
-            right:15px;
-            top:50%;
-            transform:translateY(-50%);
-            pointer-events:none;
-            font-size:14px;
-        ">
-            ▼
-        </span>
-
-    </div>
-</div>
+                <select name="buku_id" class="form-control" required>
+                    <option value="" disabled selected>Pilih buku</option>
+                    @foreach($peminjaman as $item)
+                        <option value="{{ $item->buku_id }}">
+                            {{ $item->buku->judul }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
             <!-- TANGGAL PINJAM -->
             <div class="mb-3">
                 <label class="form-label">Tanggal Pinjam</label>
-                <input type="date" class="form-control"
+                <input type="date" id="tanggal_pinjam" class="form-control"
                        value="{{ $peminjaman[0]->tanggal_pinjam }}" readonly>
             </div>
 
-            <!-- TANGGAL JATUH TEMPO -->
+            <!-- JATUH TEMPO -->
             <div class="mb-3">
                 <label class="form-label">Tanggal Jatuh Tempo</label>
                 <input type="date" id="tanggal_jatuh_tempo" class="form-control"
                        value="{{ $peminjaman[0]->tanggal_jatuh_tempo }}" readonly>
             </div>
 
-            <!-- ✅ TANGGAL KEMBALI (SUDAH DIPERBAIKI) -->
+            <!-- TANGGAL KEMBALI -->
             <div class="mb-3">
                 <label class="form-label">Tanggal Kembali</label>
                 <input type="date" name="tanggal_kembali" id="tanggal_kembali"
                        class="form-control"
-                       min="{{ $peminjaman[0]->tanggal_pinjam }}"
+                       min="{{ $peminjaman[0]->tanggal_pinjam }}"  <!-- 🔥 BATAS MIN -->
                        required>
+            </div>
+
+            <!-- KONDISI -->
+            <div class="mb-3">
+                <label class="form-label">Kondisi Buku</label>
+                <select name="kondisi_buku" id="kondisi_buku" class="form-control" required>
+                    <option value="baik">Baik</option>
+                    <option value="rusak">Rusak</option>
+                    <option value="hilang">Hilang</option>
+                </select>
             </div>
 
             <!-- DENDA -->
@@ -101,15 +84,7 @@
             </div>
 
             <!-- BUTTON -->
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">
-                    Mengembalikan
-                </button>
-
-                <a href="{{ route('anggota.pengembalian.index') }}" class="btn btn-secondary">
-                    Cancel
-                </a>
-            </div>
+            <button type="submit" class="btn btn-primary">Kembalikan</button>
 
         </form>
 
@@ -119,20 +94,46 @@
 
 </div>
 
-<!-- SCRIPT (TETAP PUNYA KAMU, TIDAK DIUBAH) -->
 <script>
-document.getElementById('tanggal_kembali')?.addEventListener('change', function () {
-    let kembali = new Date(this.value);
+function hitungDenda() {
+
+    let kembaliInput = document.getElementById('tanggal_kembali');
+    let kembali = new Date(kembaliInput.value);
+
     let tempo = new Date(document.getElementById('tanggal_jatuh_tempo').value);
+    let pinjam = new Date(document.getElementById('tanggal_pinjam').value);
+    let kondisi = document.getElementById('kondisi_buku').value;
 
     let denda = 0;
+
+    // 🔥 VALIDASI: tidak boleh sebelum tanggal pinjam
+    if (kembali < pinjam) {
+        alert("Tanggal kembali tidak boleh sebelum tanggal pinjam!");
+        kembaliInput.value = "";
+        document.getElementById('denda').value = "";
+        return;
+    }
+
+    // telat
     if (kembali > tempo) {
         let selisih = (kembali - tempo) / (1000 * 60 * 60 * 24);
-        denda = selisih * 1000;
+        denda += selisih * 5000;
+    }
+
+    // kondisi
+    if (kondisi == 'rusak') {
+        denda += 20000;
+    }
+
+    if (kondisi == 'hilang') {
+        denda += 50000;
     }
 
     document.getElementById('denda').value = denda;
-});
+}
+
+document.getElementById('tanggal_kembali').addEventListener('change', hitungDenda);
+document.getElementById('kondisi_buku').addEventListener('change', hitungDenda);
 </script>
 
 @endsection

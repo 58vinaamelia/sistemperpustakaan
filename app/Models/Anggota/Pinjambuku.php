@@ -19,24 +19,38 @@ class Pinjambuku extends Model
         'buku_id',
         'tanggal_pinjam',
         'tanggal_jatuh_tempo',
-        'tanggal_kembali', // ✅ penting untuk laporan
+        'tanggal_kembali',
         'denda',
         'status'
     ];
 
-    // ✅ RELASI KE USER
+    // =========================
+    // RELASI KE USER
+    // =========================
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // ✅ RELASI KE BUKU
+    // =========================
+    // RELASI KE BUKU
+    // =========================
     public function buku()
     {
         return $this->belongsTo(Buku::class, 'buku_id');
     }
 
-    // ✅ OPTIONAL: biar tanggal otomatis format Carbon
+    // =========================
+    // 🔥 RELASI KE PENGEMBALIAN (FIX TANPA ERROR)
+    // =========================
+    public function pengembalian()
+    {
+        return $this->hasOne(\App\Models\Anggota\Pengembalian::class, 'buku_id', 'buku_id');
+    }
+
+    // =========================
+    // FORMAT TANGGAL
+    // =========================
     protected $dates = [
         'tanggal_pinjam',
         'tanggal_jatuh_tempo',

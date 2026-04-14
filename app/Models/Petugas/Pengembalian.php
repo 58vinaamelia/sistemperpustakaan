@@ -22,6 +22,7 @@ class Pengembalian extends Model
         'tanggal_kembali',
         'denda',
         'status'
+        
     ];
 
     // Relasi ke User (anggota)

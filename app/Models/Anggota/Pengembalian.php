@@ -4,6 +4,8 @@ namespace App\Models\Anggota;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Petugas\Buku;
+use App\Models\User;
 
 class Pengembalian extends Model
 {
@@ -19,25 +21,31 @@ class Pengembalian extends Model
         'tanggal_jatuh_tempo',
         'tanggal_kembali',
         'denda',
-        'status', // ✅ tambahkan status
+        'status',
+        'kondisi_buku',
     ];
 
-    // Relasi ke Buku
+    // =========================
+    // RELASI KE BUKU
+    // =========================
     public function buku()
     {
         return $this->belongsTo(Buku::class, 'buku_id');
     }
 
-    // Relasi ke User
+    // =========================
+    // RELASI KE USER
+    // =========================
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Relasi ke Peminjaman (Pinjambuku) berdasarkan user dan buku
+    // =========================
+    // RELASI KE PEMINJAMAN
+    // =========================
     public function peminjaman()
     {
-        return $this->belongsTo(Pinjambuku::class, 'buku_id', 'buku_id')
-                    ->whereColumn('user_id', 'pengembalian.user_id');
+        return $this->belongsTo(Pinjambuku::class, 'buku_id', 'buku_id');
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Petugas;
 use App\Http\Controllers\Controller;
 use App\Models\Petugas\Pengembalian;
 use App\Models\Petugas\Peminjaman;
-use App\Models\Anggota\Pinjambuku; // 🔥 pastikan ini model anggota/anggota pinjam buku
+use App\Models\Anggota\Pinjambuku;
 use Illuminate\Http\Request;
 
 class PengembalianController extends \Illuminate\Routing\Controller
@@ -15,63 +15,97 @@ class PengembalianController extends \Illuminate\Routing\Controller
     // ==========================
     public function index()
     {
-        $data = Pengembalian::with(['user', 'buku'])->latest()->get();
+        $data = Pengembalian::with(['user', 'buku'])
+            ->latest()
+            ->get();
+
         return view('pages.petugas.pengembalian.index', compact('data'));
     }
 
     // ==========================
-    // TERIMA PENGEMBALIAN (FIX TOTAL)
+    // TERIMA PENGEMBALIAN
     // ==========================
-    public function terima(Request $request, $id)
-{
-    $pengembalian = Pengembalian::findOrFail($id);
+    public function terima($id)
+    {
+        $pengembalian = Pengembalian::with('buku')->findOrFail($id);
 
-    // ✅ ambil tanggal dari pengajuan anggota
-    $tanggal = $pengembalian->tanggal_kembali;
+        $tanggal = $pengembalian->tanggal_kembali;
 
-    // 1️⃣ Update status pengembalian
-    $pengembalian->status = 'diterima';
-    $pengembalian->save();
+        // ✅ STATUS PENGEMBALIAN
+        $pengembalian->status = 'diterima';
+        $pengembalian->save();
 
-    // 2️⃣ Update peminjaman
-    if ($pengembalian->peminjaman_id) {
-        $peminjaman = Peminjaman::find($pengembalian->peminjaman_id);
+        // ==========================
+        // UPDATE PEMINJAMAN
+        // ==========================
+        if ($pengembalian->peminjaman_id) {
+            $peminjaman = Peminjaman::find($pengembalian->peminjaman_id);
 
-        if ($peminjaman) {
-            $peminjaman->status = 'selesai';
-            $peminjaman->tanggal_kembali = $tanggal; // ✅ FIX
-            $peminjaman->save();
+            if ($peminjaman) {
+                $peminjaman->status = 'selesai';
+                $peminjaman->tanggal_kembali = $tanggal;
+                $peminjaman->save();
+            }
         }
+
+        // ==========================
+        // UPDATE PINJAM BUKU (ANGGOTA)
+        // ==========================
+        $pinjam = Pinjambuku::where('user_id', $pengembalian->user_id)
+            ->where('buku_id', $pengembalian->buku_id)
+            ->get();
+
+        foreach ($pinjam as $p) {
+            $p->status = 'selesai'; // 🔥 samakan semua jadi selesai
+            $p->tanggal_kembali = $tanggal;
+            $p->save();
+        }
+
+        return back()->with('success', 'Pengembalian diterima');
     }
-
-    // 3️⃣ Update pinjam buku
-    $pinjam = Pinjambuku::where('user_id', $pengembalian->user_id)
-        ->where('buku_id', $pengembalian->buku_id)
-        ->get();
-
-    foreach ($pinjam as $p) {
-        $p->status = 'dikembalikan';
-        $p->tanggal_kembali = $tanggal; // ✅ FIX
-        $p->save();
-    }
-
-    return back()->with('success', 'Pengembalian dikonfirmasi & semua status berhasil diupdate');
-}
 
     // ==========================
-    // TOLAK PENGEMBALIAN
+    // TOLAK
     // ==========================
     public function tolak($id)
     {
         $pengembalian = Pengembalian::findOrFail($id);
+
         $pengembalian->status = 'ditolak';
         $pengembalian->save();
+
+        // 🔥 BALIKIN STATUS KE DIPINJAM
+        $pinjam = Pinjambuku::where('user_id', $pengembalian->user_id)
+            ->where('buku_id', $pengembalian->buku_id)
+            ->get();
+
+        foreach ($pinjam as $p) {
+            $p->status = 'dipinjam';
+            $p->save();
+        }
 
         return back()->with('error', 'Pengembalian ditolak');
     }
 
     // ==========================
-    // DELETE DATA
+    // LIHAT STRUK
+    // ==========================
+    public function struk($id)
+    {
+        $data = Pengembalian::with('buku')->findOrFail($id);
+
+        return view('pages.petugas.pengembalian.struk', [
+            'nama' => $data->nama,
+            'judul' => $data->buku->judul ?? '-',
+            'tanggal_pinjam' => $data->tanggal_pinjam,
+            'tanggal_kembali' => $data->tanggal_kembali,
+            'denda' => $data->denda,
+            'status' => strtoupper($data->status) // 🔥 ambil dari DB
+        ]);
+    }
+
+    // ==========================
+    // DELETE
     // ==========================
     public function delete($id)
     {

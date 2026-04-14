@@ -147,16 +147,28 @@ class BukuController extends \Illuminate\Routing\Controller
     }
 
     public function destroy($id)
-    {
-        $buku = Buku::findOrFail($id);
+{
+    $buku = Buku::findOrFail($id);
 
-        if ($buku->foto) {
-            Storage::disk('public')->delete($buku->foto);
-        }
+    // 🔥 CEK apakah buku sedang dipinjam
+    $sedangDipinjam = \App\Models\Anggota\Pinjambuku::where('buku_id', $id)
+        ->where('status', 'dipinjam')
+        ->exists();
 
-        $buku->delete();
-
+    if ($sedangDipinjam) {
         return redirect()->route('petugas.buku.index')
-            ->with('success', 'Buku berhasil dihapus');
+            ->with('error', 'Buku tidak bisa dihapus karena sedang dipinjam!');
     }
+
+    // hapus foto kalau ada
+    if ($buku->foto) {
+        Storage::disk('public')->delete($buku->foto);
+    }
+
+    $buku->delete();
+
+    return redirect()->route('petugas.buku.index')
+        ->with('success', 'Buku berhasil dihapus');
+}
+
 }

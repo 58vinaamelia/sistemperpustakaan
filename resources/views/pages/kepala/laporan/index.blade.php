@@ -7,7 +7,9 @@
 <div class="mt-8 px-6">
 
     {{-- HEADER --}}
-    <div class="mb-6 flex justify-between items-center">
+    <div class="mb-6 flex justify-between items-start">
+
+        {{-- TITLE --}}
         <div>
             <h1 class="text-2xl font-bold text-gray-800">
                 📊 Laporan Peminjaman & Pengembalian
@@ -17,58 +19,68 @@
             </p>
         </div>
 
-        {{-- 🔥 TOMBOL CETAK & PDF --}}
-       <div class="flex gap-3">
+        {{-- BUTTON CETAK & PDF --}}
+        <div class="flex gap-3">
 
-    {{-- CETAK --}}
-    <a href="{{ route('kepala.laporan.cetak', request()->all()) }}" target="_blank"
-        class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-800 px-5 py-2 rounded-xl shadow text-sm font-semibold border border-green-300">
-        🖨️ <span>Cetak</span>
-    </a>
+            <a href="{{ route('kepala.laporan.cetak', request()->all()) }}" target="_blank"
+                class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-800 px-5 py-2 rounded-xl shadow text-sm font-semibold border border-green-300">
+                🖨️ <span>Cetak</span>
+            </a>
 
-    {{-- PDF --}}
-    <a href="{{ route('kepala.laporan.pdf', request()->all()) }}"
-        class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl shadow-md text-sm font-semibold">
-        📄 <span>PDF</span>
-    </a>
+            <a href="{{ route('kepala.laporan.pdf', request()->all()) }}"
+                class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl shadow-md text-sm font-semibold">
+                📄 <span>PDF</span>
+            </a>
 
-</div>
+        </div>
     </div>
 
     {{-- FILTER --}}
     <div class="bg-white p-4 rounded-xl shadow-sm border mb-6">
-        <form method="GET" class="flex flex-wrap gap-4 items-end">
+        <form method="GET" action="{{ route('kepala.laporan.index') }}"
+            class="flex flex-wrap gap-4 items-end justify-between">
 
-            <div>
-                <label class="text-xs text-gray-500">Bulan</label>
-                <input type="month" name="bulan" value="{{ request('bulan') }}"
-                    class="border rounded-lg px-3 py-2 text-sm">
+            <div class="flex flex-wrap gap-4 items-end">
+
+                {{-- BULAN --}}
+                <div>
+                    <label class="text-xs text-gray-500">Bulan</label>
+                    <input type="month" name="bulan" value="{{ request('bulan') }}"
+                        class="border rounded-lg px-3 py-2 text-sm">
+                </div>
+
+                {{-- DARI --}}
+                <div>
+                    <label class="text-xs text-gray-500">Dari</label>
+                    <input type="date" name="dari" value="{{ request('dari') }}"
+                        class="border rounded-lg px-3 py-2 text-sm">
+                </div>
+
+                {{-- SAMPAI --}}
+                <div>
+                    <label class="text-xs text-gray-500">Sampai</label>
+                    <input type="date" name="sampai" value="{{ request('sampai') }}"
+                        class="border rounded-lg px-3 py-2 text-sm">
+                </div>
+
             </div>
 
-            <div>
-                <label class="text-xs text-gray-500">Dari</label>
-                <input type="date" name="dari" value="{{ request('dari') }}"
-                    class="border rounded-lg px-3 py-2 text-sm">
+            {{-- BUTTON --}}
+            <div class="flex items-center gap-3">
+                <button type="submit"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-lg text-sm">
+                    Filter
+                </button>
+
+                <a href="{{ route('kepala.laporan.index') }}"
+                    class="text-gray-500 text-sm hover:underline">
+                    Reset
+                </a>
             </div>
-
-            <div>
-                <label class="text-xs text-gray-500">Sampai</label>
-                <input type="date" name="sampai" value="{{ request('sampai') }}"
-                    class="border rounded-lg px-3 py-2 text-sm">
-            </div>
-
-            <button type="submit"
-                class="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm">
-                Filter
-            </button>
-
-            <a href="{{ route('kepala.laporan.index') }}"
-               class="text-gray-500 text-sm">
-               Reset
-            </a>
 
         </form>
     </div>
+
 
     {{-- TABLE --}}
     <div class="bg-white rounded-2xl shadow-sm border overflow-hidden mb-10">
@@ -96,19 +108,29 @@
                         <th class="px-6 py-3">Tgl Kembali</th>
                         <th class="px-6 py-3 text-center">Denda</th>
                         <th class="px-6 py-3 text-center">Status</th>
+                        <th class="px-6 py-3 text-center">Kondisi</th>
                     </tr>
                 </thead>
 
                 <tbody class="divide-y">
 
                     @forelse($peminjaman as $item)
+
                     @php
+                        $pengembalian = \App\Models\Anggota\Pengembalian::where('user_id', $item->user_id)
+                            ->where('buku_id', $item->buku_id)
+                            ->latest()
+                            ->first();
+
+                        $tanggalKembali = $pengembalian->tanggal_kembali ?? null;
+                        $kondisi = $pengembalian->kondisi_buku ?? null;
+
                         $jatuhTempo = $item->tanggal_pinjam
                             ? strtotime($item->tanggal_pinjam . ' +7 days')
                             : null;
 
-                        $tanggalCek = $item->tanggal_kembali
-                            ? strtotime($item->tanggal_kembali)
+                        $tanggalCek = $tanggalKembali
+                            ? strtotime($tanggalKembali)
                             : time();
 
                         $isTerlambat = $jatuhTempo && $tanggalCek > $jatuhTempo;
@@ -144,7 +166,7 @@
                         </td>
 
                         <td class="px-6 py-4">
-                            {{ $item->tanggal_kembali ? date('d M Y', strtotime($item->tanggal_kembali)) : '-' }}
+                            {{ $tanggalKembali ? date('d M Y', strtotime($tanggalKembali)) : '-' }}
                         </td>
 
                         <td class="px-6 py-4 text-center text-red-600 font-semibold">
@@ -171,11 +193,34 @@
                             @endif
                         </td>
 
+                        <td class="px-6 py-4 text-center">
+
+                            @if($kondisi == 'baik')
+                                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">
+                                    Baik
+                                </span>
+
+                            @elseif($kondisi == 'rusak')
+                                <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs">
+                                    Rusak
+                                </span>
+
+                            @elseif($kondisi == 'hilang')
+                                <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">
+                                    Hilang
+                                </span>
+
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+
+                        </td>
+
                     </tr>
 
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-8 text-gray-400">
+                        <td colspan="9" class="text-center py-8 text-gray-400">
                             Tidak ada data
                         </td>
                     </tr>
@@ -186,7 +231,6 @@
             </table>
         </div>
 
-        {{-- PAGINATION --}}
         <div class="px-6 py-4 border-t bg-gray-50">
             {{ $peminjaman->withQueryString()->links() }}
         </div>

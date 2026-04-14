@@ -144,6 +144,8 @@ Route::prefix('petugas')->name('petugas.')->middleware('auth')->group(function()
     Route::post('/pengembalian/{id}/terima', [PetugasPengembalianController::class, 'terima'])->name('pengembalian.terima');
     Route::post('/pengembalian/{id}/tolak', [PetugasPengembalianController::class, 'tolak'])->name('pengembalian.tolak');
     Route::delete('/pengembalian/{id}', [PetugasPengembalianController::class, 'delete'])->name('pengembalian.delete');
+    Route::get('/pengembalian/{id}/struk', [PetugasPengembalianController::class, 'struk'])
+        ->name('pengembalian.struk');
 
     // =======================
     // ANGGOTA
