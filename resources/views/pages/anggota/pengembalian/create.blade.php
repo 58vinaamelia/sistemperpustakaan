@@ -30,18 +30,26 @@
                        value="{{ Auth::user()->name }}" readonly>
             </div>
 
-            <!-- JUDUL BUKU -->
+            <!-- 🔥 JUDUL BUKU (FIX ICON DROPDOWN) -->
             <div class="mb-3">
                 <label class="form-label">Judul Buku</label>
 
-                <select name="buku_id" class="form-control" required>
-                    <option value="" disabled selected>Pilih buku</option>
-                    @foreach($peminjaman as $item)
-                        <option value="{{ $item->buku_id }}">
-                            {{ $item->buku->judul }}
-                        </option>
-                    @endforeach
-                </select>
+                <div style="position:relative;">
+                    <select name="buku_id" class="form-control pe-5" required
+                            style="appearance:none; -webkit-appearance:none;">
+                        <option value="" disabled selected>Pilih buku</option>
+                        @foreach($peminjaman as $item)
+                            <option value="{{ $item->buku_id }}">
+                                {{ $item->buku->judul }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <!-- ICON -->
+                    <span style="position:absolute; right:15px; top:50%; transform:translateY(-50%); pointer-events:none;">
+                        ▼
+                    </span>
+                </div>
             </div>
 
             <!-- TANGGAL PINJAM -->
@@ -59,22 +67,33 @@
             </div>
 
             <!-- TANGGAL KEMBALI -->
+            <!-- TANGGAL KEMBALI -->
             <div class="mb-3">
                 <label class="form-label">Tanggal Kembali</label>
                 <input type="date" name="tanggal_kembali" id="tanggal_kembali"
-                       class="form-control"
-                       min="{{ $peminjaman[0]->tanggal_pinjam }}"  <!-- 🔥 BATAS MIN -->
-                       required>
+                    class="form-control"
+                    min="{{ date('Y-m-d') }}" required>
             </div>
 
-            <!-- KONDISI -->
+            <!-- 🔥 KONDISI BUKU (FIX ICON DROPDOWN) -->
             <div class="mb-3">
                 <label class="form-label">Kondisi Buku</label>
-                <select name="kondisi_buku" id="kondisi_buku" class="form-control" required>
-                    <option value="baik">Baik</option>
-                    <option value="rusak">Rusak</option>
-                    <option value="hilang">Hilang</option>
-                </select>
+
+                <div style="position:relative;">
+                    <select name="kondisi_buku" id="kondisi_buku"
+                            class="form-control pe-5"
+                            required
+                            style="appearance:none; -webkit-appearance:none;">
+                        <option value="baik">Baik</option>
+                        <option value="rusak">Rusak</option>
+                        <option value="hilang">Hilang</option>
+                    </select>
+
+                    <!-- ICON -->
+                    <span style="position:absolute; right:15px; top:50%; transform:translateY(-50%); pointer-events:none;">
+                        ▼
+                    </span>
+                </div>
             </div>
 
             <!-- DENDA -->
@@ -106,7 +125,6 @@ function hitungDenda() {
 
     let denda = 0;
 
-    // 🔥 VALIDASI: tidak boleh sebelum tanggal pinjam
     if (kembali < pinjam) {
         alert("Tanggal kembali tidak boleh sebelum tanggal pinjam!");
         kembaliInput.value = "";
@@ -114,13 +132,11 @@ function hitungDenda() {
         return;
     }
 
-    // telat
     if (kembali > tempo) {
         let selisih = (kembali - tempo) / (1000 * 60 * 60 * 24);
         denda += selisih * 5000;
     }
 
-    // kondisi
     if (kondisi == 'rusak') {
         denda += 20000;
     }

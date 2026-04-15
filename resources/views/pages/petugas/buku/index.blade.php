@@ -2,16 +2,23 @@
 
 @section('content')
 
-<!-- NOTIFIKASI -->
+<!-- 🔥 NOTIFIKASI -->
 @if(session('success'))
     <div class="alert alert-success mt-2">
         {{ session('success') }}
     </div>
 @endif
 
+{{-- 🔴 INI YANG KAMU BUTUH --}}
+@if(session('error'))
+    <div class="alert alert-danger mt-2">
+        {{ session('error') }}
+    </div>
+@endif
+
 <!-- HEADER -->
 <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
-    <h4 class="fw-bold m-0">Data Buku</h4> 
+    <h4 class="fw-bold m-0">Data Buku</h4>
     <a href="{{ route('petugas.buku.create') }}"
        class="btn text-white px-3 py-2"
        style="background:#4e63c9;">
@@ -35,7 +42,7 @@
 <div class="row">
 
     @forelse ($buku as $item)
-        <div class="col-md-2 col-sm-4 col-6 mb-4"> {{-- 6 per baris di desktop --}}
+        <div class="col-md-2 col-sm-4 col-6 mb-4">
 
             <div class="text-center shadow rounded p-3 h-100"
                  style="background:#f5f5f5; transition:0.3s;"
@@ -80,11 +87,15 @@
                     Edit
                 </a>
 
+                <!-- 🔥 HAPUS (BIAR MASUK KE CONTROLLER) -->
                 <form action="{{ route('petugas.buku.destroy', $item->id) }}" method="POST"
                       onsubmit="return confirm('Yakin ingin menghapus buku ini?');">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-danger" style="width:100%;">
+
+                    <button type="submit"
+                        class="btn btn-sm btn-danger"
+                        style="width:100%;">
                         Hapus
                     </button>
                 </form>

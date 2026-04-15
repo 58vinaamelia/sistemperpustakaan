@@ -12,15 +12,17 @@ class BukuController extends \Illuminate\Routing\Controller
     {
         $search = $request->search;
 
-        $query = Buku::when($search, function ($q, $search) {
-            return $q->where('judul', 'like', "%$search%");
-        })->latest();
+        // 🔥 WAJIB biar relasi kebaca
+        $query = Buku::with('pinjambuku')
+            ->when($search, function ($q, $search) {
+                return $q->where('judul', 'like', "%$search%");
+            })
+            ->latest();
 
-        // 🔥 LOGIC 6 DATA ATAU SEMUA
         if ($request->lihat_semua) {
-            $buku = $query->get(); // semua data
+            $buku = $query->get();
         } else {
-            $buku = $query->limit(6)->get(); // default 6
+            $buku = $query->limit(6)->get();
         }
 
         return view('pages.petugas.buku.index', compact('buku'));
@@ -131,12 +133,10 @@ class BukuController extends \Illuminate\Routing\Controller
                 }
             }
 
-            // hapus lama
             if ($buku->foto && Storage::disk('public')->exists($buku->foto)) {
                 Storage::disk('public')->delete($buku->foto);
             }
 
-            // simpan baru
             $data['foto'] = $request->file('foto')->store('buku', 'public');
         }
 
@@ -147,28 +147,20 @@ class BukuController extends \Illuminate\Routing\Controller
     }
 
     public function destroy($id)
-{
-    $buku = Buku::findOrFail($id);
+    {
+        $buku = Buku::findOrFail($id);
 
-    // 🔥 CEK apakah buku sedang dipinjam
-    $sedangDipinjam = \App\Models\Anggota\Pinjambuku::where('buku_id', $id)
-        ->where('status', 'dipinjam')
-        ->exists();
+        // 🔥 FIX TOTAL: pakai relasi dari model
+        if ($buku->pinjambuku()->where('status', 'dipinjam')->exists()) {
+            return back()->with('error', 'Buku ini sedang dipinjam, tidak bisa dihapus!');
+        }
 
-    if ($sedangDipinjam) {
-        return redirect()->route('petugas.buku.index')
-            ->with('error', 'Buku tidak bisa dihapus karena sedang dipinjam!');
+        if ($buku->foto) {
+            Storage::disk('public')->delete($buku->foto);
+        }
+
+        $buku->delete();
+
+        return back()->with('success', 'Buku berhasil dihapus');
     }
-
-    // hapus foto kalau ada
-    if ($buku->foto) {
-        Storage::disk('public')->delete($buku->foto);
-    }
-
-    $buku->delete();
-
-    return redirect()->route('petugas.buku.index')
-        ->with('success', 'Buku berhasil dihapus');
-}
-
 }

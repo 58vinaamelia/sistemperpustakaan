@@ -4,7 +4,7 @@ namespace App\Models\Petugas;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Anggota\Pinjambuku; // 🔥 FIX relasi
+use App\Models\Anggota\Pinjambuku;
 
 class Buku extends Model
 {
@@ -36,11 +36,23 @@ class Buku extends Model
     }
 
     /**
+     * 🔥 HITUNG STOK TERSEDIA (INI YANG KAMU BUTUH)
+     */
+    public function stokTersedia()
+    {
+        $dipinjam = $this->pinjambuku()
+            ->whereIn('status', ['pending', 'dipinjam'])
+            ->count();
+
+        return $this->stok - $dipinjam;
+    }
+
+    /**
      * 🔥 CEK APAKAH BUKU TERSEDIA
      */
     public function isTersedia()
     {
-        return $this->stok > 0;
+        return $this->stokTersedia() > 0;
     }
 
     /**

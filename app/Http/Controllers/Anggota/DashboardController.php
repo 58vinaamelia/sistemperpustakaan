@@ -10,16 +10,17 @@ class DashboardController extends \Illuminate\Routing\Controller
 {
     public function index(Request $request)
     {
-        // Query peminjaman milik user login
+        $userId = Auth::id();
+
+        // 🔥 QUERY DATA PEMINJAMAN
         $query = Pinjambuku::with(['buku','user'])
-                    ->where('user_id', Auth::id())
+                    ->where('user_id', $userId)
                     ->latest();
 
-        // Jika ada keyword search
-        if ($request->has('search') && !empty($request->search)) {
+        // 🔍 SEARCH
+        if ($request->filled('search')) {
             $keyword = $request->search;
 
-            // Filter berdasarkan judul buku
             $query->whereHas('buku', function($q) use ($keyword) {
                 $q->where('judul', 'like', "%{$keyword}%");
             });
@@ -27,16 +28,16 @@ class DashboardController extends \Illuminate\Routing\Controller
 
         $peminjaman = $query->get();
 
-        // 🔥 TAMBAHAN WAJIB (BIAR CARD JALAN)
-        $totalDipinjam = Pinjambuku::where('user_id', Auth::id())
-            ->where('status', 'dipinjam')
+        // 🔥 TOTAL DIPINJAM (lebih fleksibel)
+        $totalDipinjam = Pinjambuku::where('user_id', $userId)
+            ->whereIn('status', ['dipinjam', 'terlambat'])
             ->count();
 
-        $totalDikembalikan = Pinjambuku::where('user_id', Auth::id())
-            ->where('status', 'dikembalikan')
+        // 🔥 FIX TOTAL DIKEMBALIKAN (ANTI ERROR DATA KOTOR)
+        $totalDikembalikan = Pinjambuku::where('user_id', $userId)
+            ->whereRaw('LOWER(TRIM(REPLACE(status, "\"", ""))) = ?', ['dikembalikan'])
             ->count();
 
-        // 🔥 KIRIM KE VIEW
         return view('pages.anggota.dashboard.index', compact(
             'peminjaman',
             'totalDipinjam',

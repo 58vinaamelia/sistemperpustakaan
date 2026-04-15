@@ -39,17 +39,26 @@
                 {{ $item->judul }}
             </h6>
 
-            <!-- STATUS -->
+            <!-- 🔥 STATUS (FIX DI SINI) -->
             <div class="mb-2">
+
                 @if($item->dipinjam_sendiri)
                     <span class="badge bg-primary">
                         Sedang Kamu Pinjam
                     </span>
+
+                @elseif($item->stok <= 0) {{-- 🔥 INI KUNCI --}}
+                    <span class="badge bg-danger">
+                        Habis
+                    </span>
+
                 @else
                     <span class="badge bg-success">
                         Tersedia
                     </span>
+
                 @endif
+
             </div>
 
             <!-- BUTTON -->
@@ -58,7 +67,6 @@
                 style="background:#4e63c9;">
                 Detail
             </a>
-
 
         </div>
     @empty
