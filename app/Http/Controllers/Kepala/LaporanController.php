@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Kepala;
 
 use Illuminate\Http\Request;
-use App\Models\Anggota\PinjamBuku;
+use App\Models\Kepala\PinjamBuku;
 use App\Models\Anggota\Pengembalian;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -14,7 +14,7 @@ class LaporanController extends \Illuminate\Routing\Controller
     // =========================
     public function index(Request $request)
     {
-        $query = PinjamBuku::with(['user', 'buku']);
+        $query = PinjamBuku::withTrashed()->with(['user', 'buku']);
 
         // 🔥 FILTER BULAN
         if ($request->filled('bulan')) {
@@ -45,6 +45,9 @@ class LaporanController extends \Illuminate\Routing\Controller
 
             $item->kondisi_buku = $pengembalian->kondisi_buku ?? null;
             $item->tanggal_kembali_real = $pengembalian->tanggal_kembali ?? null;
+            $item->status_pengembalian = $pengembalian->status ?? null;
+            $item->denda_real = $pengembalian->denda ?? 0;
+            $item->alasan_ditolak = $pengembalian->alasan_ditolak ?? null;
         }
 
         return view('pages.kepala.laporan.index', compact('peminjaman'));
@@ -55,7 +58,7 @@ class LaporanController extends \Illuminate\Routing\Controller
     // =========================
     public function cetak(Request $request)
     {
-        $query = PinjamBuku::with(['user', 'buku']);
+        $query = PinjamBuku::withTrashed()->with(['user', 'buku']);
 
         if ($request->filled('bulan')) {
             $bulan = explode('-', $request->bulan);
@@ -82,6 +85,9 @@ class LaporanController extends \Illuminate\Routing\Controller
 
             $item->kondisi_buku = $pengembalian->kondisi_buku ?? null;
             $item->tanggal_kembali_real = $pengembalian->tanggal_kembali ?? null;
+            $item->status_pengembalian = $pengembalian->status ?? null;
+            $item->denda_real = $pengembalian->denda ?? 0;
+            $item->alasan_ditolak = $pengembalian->alasan_ditolak ?? null;
         }
 
         return view('pages.kepala.laporan.cetak', compact('peminjaman'));
@@ -92,7 +98,7 @@ class LaporanController extends \Illuminate\Routing\Controller
     // =========================
     public function pdf(Request $request)
     {
-        $query = PinjamBuku::with(['user', 'buku']);
+        $query = PinjamBuku::withTrashed()->with(['user', 'buku']);
 
         if ($request->filled('bulan')) {
             $bulan = explode('-', $request->bulan);
@@ -119,6 +125,9 @@ class LaporanController extends \Illuminate\Routing\Controller
 
             $item->kondisi_buku = $pengembalian->kondisi_buku ?? null;
             $item->tanggal_kembali_real = $pengembalian->tanggal_kembali ?? null;
+            $item->status_pengembalian = $pengembalian->status ?? null;
+            $item->denda_real = $pengembalian->denda ?? 0;
+            $item->alasan_ditolak = $pengembalian->alasan_ditolak ?? null;
         }
 
         $pdf = Pdf::loadView('pages.kepala.laporan.cetak', compact('peminjaman'));

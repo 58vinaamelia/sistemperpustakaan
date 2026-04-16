@@ -97,17 +97,19 @@
                         @if($status == 'pending')
                             <form action="{{ route('petugas.peminjaman.konfirmasi', $item->id) }}" method="POST" style="display:inline;">
                                 @csrf
-                                <button type="submit" style="background:#16a34a; color:white; padding:6px 12px; border:none; border-radius:6px;">
-                                    ✔ Konfirmasi
+                                <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menyetujui peminjaman ini?')" style="background:#16a34a; color:white; padding:6px 12px; border:none; border-radius:6px;">
+                                    ✔ setujui
                                 </button>
                             </form>
 
-                            <form action="{{ route('petugas.peminjaman.tolak', $item->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                <button type="submit" style="background:#dc2626; color:white; padding:6px 12px; border:none; border-radius:6px;">
-                                    ✖ Tolak
-                                </button>
-                            </form>
+                            <a href="{{ route('petugas.peminjaman.tolak.form', $item->id) }}" class="btn" style="background:#dc2626; color:white; padding:6px 12px; border:none; border-radius:6px; text-decoration:none;">
+                                ✖ Tolak
+                            </a>
+
+                        @elseif($status == 'dipinjam')
+                            <a href="{{ route('petugas.peminjaman.kembalikan.form', $item->id) }}" class="btn" style="background:#2563eb; color:white; padding:6px 12px; border:none; border-radius:6px; text-decoration:none;">
+                                ↩️ Kembalikan
+                            </a>
 
                         @else
                             <span style="color:gray; font-style:italic;">Sudah diproses</span>

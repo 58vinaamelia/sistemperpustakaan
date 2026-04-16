@@ -33,9 +33,9 @@ class DashboardController extends \Illuminate\Routing\Controller
             ->whereIn('status', ['dipinjam', 'terlambat'])
             ->count();
 
-        // 🔥 FIX TOTAL DIKEMBALIKAN (ANTI ERROR DATA KOTOR)
+        // 🔥 FIX TOTAL DIKEMBALIKAN (HITUNG STATUS SELESAI)
         $totalDikembalikan = Pinjambuku::where('user_id', $userId)
-            ->whereRaw('LOWER(TRIM(REPLACE(status, "\"", ""))) = ?', ['dikembalikan'])
+            ->where('status', 'selesai')
             ->count();
 
         return view('pages.anggota.dashboard.index', compact(

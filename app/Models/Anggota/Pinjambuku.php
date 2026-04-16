@@ -4,12 +4,13 @@ namespace App\Models\Anggota;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\User;
 use App\Models\Petugas\Buku;
 
 class Pinjambuku extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'pinjambuku';
 
@@ -21,7 +22,8 @@ class Pinjambuku extends Model
         'tanggal_jatuh_tempo',
         'tanggal_kembali',
         'denda',
-        'status'
+        'status',
+        'alasan_ditolak'
     ];
 
     // =========================
@@ -54,6 +56,7 @@ class Pinjambuku extends Model
     protected $dates = [
         'tanggal_pinjam',
         'tanggal_jatuh_tempo',
-        'tanggal_kembali'
+        'tanggal_kembali',
+        'deleted_at'
     ];
 }

@@ -21,8 +21,8 @@ class Pengembalian extends Model
         'tanggal_jatuh_tempo',
         'tanggal_kembali',
         'denda',
-        'status'
-        
+        'status',
+        'kondisi_buku'
     ];
 
     // Relasi ke User (anggota)

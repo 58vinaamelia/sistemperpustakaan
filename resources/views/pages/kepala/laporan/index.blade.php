@@ -117,13 +117,8 @@
                     @forelse($peminjaman as $item)
 
                     @php
-                        $pengembalian = \App\Models\Anggota\Pengembalian::where('user_id', $item->user_id)
-                            ->where('buku_id', $item->buku_id)
-                            ->latest()
-                            ->first();
-
-                        $tanggalKembali = $pengembalian->tanggal_kembali ?? null;
-                        $kondisi = $pengembalian->kondisi_buku ?? null;
+                        $tanggalKembali = $item->tanggal_kembali_real;
+                        $kondisi = strtolower(trim($item->kondisi_buku ?? ''));
 
                         $jatuhTempo = $item->tanggal_pinjam
                             ? strtotime($item->tanggal_pinjam . ' +7 days')
@@ -134,13 +129,6 @@
                             : time();
 
                         $isTerlambat = $jatuhTempo && $tanggalCek > $jatuhTempo;
-
-                        $denda = 0;
-
-                        if ($isTerlambat) {
-                            $hariTelat = floor(($tanggalCek - $jatuhTempo) / (60 * 60 * 24));
-                            $denda = $hariTelat * 1000;
-                        }
                     @endphp
 
                     <tr class="hover:bg-gray-50">
@@ -170,21 +158,37 @@
                         </td>
 
                         <td class="px-6 py-4 text-center text-red-600 font-semibold">
-                            @if($denda > 0)
-                                Rp {{ number_format($denda, 0, ',', '.') }}
+                            @if($item->denda_real > 0)
+                                Rp {{ number_format($item->denda_real, 0, ',', '.') }}
                             @else
                                 -
                             @endif
                         </td>
 
                         <td class="px-6 py-4 text-center">
-                            @if($isTerlambat)
+                            @if($item->status_pengembalian == 'diterima')
+                                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">
+                                    Selesai
+                                </span>
+                            @elseif($item->status_pengembalian == 'menunggu')
+                                <span class="bg-yellow-300 text-yellow-900 px-3 py-1 rounded-full text-xs">
+                                    Menunggu
+                                </span>
+                            @elseif($item->status_pengembalian == 'ditolak')
                                 <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">
-                                    Terlambat
+                                    Ditolak
                                 </span>
                             @elseif($item->status == 'dipinjam')
                                 <span class="bg-yellow-300 text-yellow-900 px-3 py-1 rounded-full text-xs">
                                     Dipinjam
+                                </span>
+                            @elseif($item->status == 'telat')
+                                <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">
+                                    Terlambat
+                                </span>
+                            @elseif($item->status == 'dihapus')
+                                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs">
+                                    Dihapus
                                 </span>
                             @else
                                 <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">

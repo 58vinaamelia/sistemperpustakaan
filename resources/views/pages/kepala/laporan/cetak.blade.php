@@ -36,30 +36,39 @@
             <th>Tgl Kembali</th>
             <th>Denda</th>
             <th>Status</th>
-            
+            <th>Kondisi</th>
         </tr>
     </thead>
     <tbody>
         @foreach($peminjaman as $i => $item)
         @php
-            // 🔥 JATUH TEMPO (7 hari)
+            $kondisi = strtolower(trim($item->kondisi_buku ?? ''));
+
             $jatuhTempo = $item->tanggal_pinjam
                 ? strtotime($item->tanggal_pinjam . ' +7 days')
                 : null;
 
-            // 🔥 tanggal pembanding
-            $tanggalCek = $item->tanggal_kembali
-                ? strtotime($item->tanggal_kembali)
+            $tanggalCek = $item->tanggal_kembali_real
+                ? strtotime($item->tanggal_kembali_real)
                 : time();
 
-            // 🔥 cek terlambat
             $isTerlambat = $jatuhTempo && $tanggalCek > $jatuhTempo;
 
-            // 🔥 hitung denda
-            $denda = 0;
-            if ($isTerlambat) {
-                $hariTelat = floor(($tanggalCek - $jatuhTempo) / (60 * 60 * 24));
-                $denda = $hariTelat * 1000;
+            $statusLabel = '-';
+            if ($item->status_pengembalian == 'diterima') {
+                $statusLabel = 'Selesai';
+            } elseif ($item->status_pengembalian == 'menunggu') {
+                $statusLabel = 'Menunggu';
+            } elseif ($item->status_pengembalian == 'ditolak') {
+                $statusLabel = 'Ditolak';
+            } elseif ($item->status == 'dipinjam') {
+                $statusLabel = 'Dipinjam';
+            } elseif ($item->status == 'dihapus') {
+                $statusLabel = 'Dihapus';
+            } elseif ($item->status == 'telat' || $isTerlambat) {
+                $statusLabel = 'Terlambat';
+            } else {
+                $statusLabel = 'Dikembalikan';
             }
         @endphp
 
@@ -77,25 +86,28 @@
             </td>
 
             <td>
-                {{ $item->tanggal_kembali ? date('d M Y', strtotime($item->tanggal_kembali)) : '-' }}
+                {{ $item->tanggal_kembali_real ? date('d M Y', strtotime($item->tanggal_kembali_real)) : '-' }}
             </td>
 
             {{-- 🔥 DENDA --}}
             <td>
-                @if($denda > 0)
-                    Rp {{ number_format($denda, 0, ',', '.') }}
+                @if($item->denda_real > 0)
+                    Rp {{ number_format($item->denda_real, 0, ',', '.') }}
                 @else
                     -
                 @endif
             </td>
 
+            <td>{{ $statusLabel }}</td>
             <td>
-                @if($isTerlambat)
-                    Terlambat
-                @elseif($item->status == 'dipinjam')
-                    Dipinjam
+                @if($kondisi == 'baik')
+                    Baik
+                @elseif($kondisi == 'rusak')
+                    Rusak
+                @elseif($kondisi == 'hilang')
+                    Hilang
                 @else
-                    Dikembalikan
+                    -
                 @endif
             </td>
         </tr>

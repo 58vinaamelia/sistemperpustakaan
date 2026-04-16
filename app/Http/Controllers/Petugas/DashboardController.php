@@ -21,6 +21,7 @@ class DashboardController extends Controller
 
         // QUERY DASAR
         $query = Pinjambuku::with(['user', 'buku'])
+            ->where('status', '<>', 'dihapus')
             ->when($search, function ($q, $search) {
                 $q->where(function ($sub) use ($search) {
                     $sub->whereHas('user', function ($u) use ($search) {

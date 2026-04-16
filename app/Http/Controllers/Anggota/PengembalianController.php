@@ -15,6 +15,7 @@ class PengembalianController extends \Illuminate\Routing\Controller
     {
         $pengembalian = Pengembalian::with('buku')
             ->where('user_id', Auth::id())
+            ->where('status', 'diterima')
             ->latest()
             ->get();
 

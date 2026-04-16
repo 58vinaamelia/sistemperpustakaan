@@ -32,7 +32,7 @@
     </div>
 
     <!-- Card 2 -->
-    <div style="flex:1; min-width:250px; background:#f9fafb; padding:20px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); display:flex; align-items:center; gap:15px;">
+    <a href="{{ route('anggota.pengembalian.index') }}" style="flex:1; min-width:250px; background:#f9fafb; padding:20px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); display:flex; align-items:center; gap:15px; text-decoration:none; color:inherit;">
 
         <div style="background:#dbeafe; padding:12px; border-radius:50%; font-size:20px;">
             📗
@@ -46,7 +46,7 @@
                 {{ $totalDikembalikan }}
             </div>
         </div>
-    </div>
+    </a>
 
 </div>
 
@@ -82,11 +82,11 @@
                     <span style="background:#22c55e; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
                         Dipinjam
                     </span>
-                @elseif($status == 'dikembalikan')
+                @elseif($status == 'selesai')
                     <span style="background:#2263c5; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
                         Dikembalikan
                     </span>
-                @elseif($status == 'terlambat')
+                @elseif($status == 'telat')
                     <span style="background:#ef4444; color:white; padding:4px 10px; border-radius:6px; font-size:12px;">
                         Terlambat
                     </span>

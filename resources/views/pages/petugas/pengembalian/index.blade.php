@@ -47,7 +47,7 @@
                     Rp {{ number_format($item->denda ?? 0, 0, ',', '.') }}
                 </td>
 
-                {{-- ✅ STATUS --}}
+                {{--  STATUS --}}
                 <td>
                     @if($item->status == 'menunggu')
                         <span class="badge bg-warning text-dark">Menunggu</span>

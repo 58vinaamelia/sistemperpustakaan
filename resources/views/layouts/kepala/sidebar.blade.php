@@ -15,9 +15,9 @@
                         class="w-full h-full object-cover object-center">
                 </div>
             @else
-                <div class="w-20 h-20 mb-3 rounded-full bg-purple-600 flex items-center justify-center flex-none">
-                    <img src="{{ asset('storage/tumpukanbuku.jpg') }}"
-                        style="width:60px; height:60px; object-fit:contain;">
+                <div class="w-20 h-20 mb-3 rounded-full  flex items-center justify-center flex-none">
+                    <img src="{{ asset('storage/logo.png') }}"
+                        style="width:80px; height:80px; object-fit:contain;">
                 </div>
             @endif
 

@@ -35,11 +35,13 @@
                 <label class="form-label">Judul Buku</label>
 
                 <div style="position:relative;">
-                    <select name="buku_id" class="form-control pe-5" required
+                    <select name="buku_id" id="buku_id" class="form-control pe-5" required
                             style="appearance:none; -webkit-appearance:none;">
                         <option value="" disabled selected>Pilih buku</option>
                         @foreach($peminjaman as $item)
-                            <option value="{{ $item->buku_id }}">
+                            <option value="{{ $item->buku_id }}"
+                                    data-pinjam="{{ $item->tanggal_pinjam }}"
+                                    data-tempo="{{ $item->tanggal_jatuh_tempo }}">
                                 {{ $item->buku->judul }}
                             </option>
                         @endforeach
@@ -50,23 +52,13 @@
                         ▼
                     </span>
                 </div>
+
+                <input type="hidden" name="tanggal_pinjam" id="tanggal_pinjam"
+                       value="{{ $peminjaman->first()?->tanggal_pinjam ?? '' }}">
+                <input type="hidden" name="tanggal_jatuh_tempo" id="tanggal_jatuh_tempo"
+                       value="{{ $peminjaman->first()?->tanggal_jatuh_tempo ?? '' }}">
             </div>
 
-            <!-- TANGGAL PINJAM -->
-            <div class="mb-3">
-                <label class="form-label">Tanggal Pinjam</label>
-                <input type="date" id="tanggal_pinjam" class="form-control"
-                       value="{{ $peminjaman[0]->tanggal_pinjam }}" readonly>
-            </div>
-
-            <!-- JATUH TEMPO -->
-            <div class="mb-3">
-                <label class="form-label">Tanggal Jatuh Tempo</label>
-                <input type="date" id="tanggal_jatuh_tempo" class="form-control"
-                       value="{{ $peminjaman[0]->tanggal_jatuh_tempo }}" readonly>
-            </div>
-
-            <!-- TANGGAL KEMBALI -->
             <!-- TANGGAL KEMBALI -->
             <div class="mb-3">
                 <label class="form-label">Tanggal Kembali</label>
@@ -114,42 +106,71 @@
 </div>
 
 <script>
+function updateTanggalPeminjaman() {
+    const select = document.getElementById('buku_id');
+    const option = select.options[select.selectedIndex];
+    const pinjamInput = document.getElementById('tanggal_pinjam');
+    const tempoInput = document.getElementById('tanggal_jatuh_tempo');
+
+    if (!option || !option.value) {
+        pinjamInput.value = '';
+        tempoInput.value = '';
+        document.getElementById('denda').value = '';
+        return;
+    }
+
+    pinjamInput.value = option.dataset.pinjam || '';
+    tempoInput.value = option.dataset.tempo || '';
+    hitungDenda();
+}
+
 function hitungDenda() {
+    const kembaliInput = document.getElementById('tanggal_kembali');
+    const kembali = new Date(kembaliInput.value);
 
-    let kembaliInput = document.getElementById('tanggal_kembali');
-    let kembali = new Date(kembaliInput.value);
+    const tempo = new Date(document.getElementById('tanggal_jatuh_tempo').value);
+    const pinjam = new Date(document.getElementById('tanggal_pinjam').value);
+    const kondisi = document.getElementById('kondisi_buku').value;
 
-    let tempo = new Date(document.getElementById('tanggal_jatuh_tempo').value);
-    let pinjam = new Date(document.getElementById('tanggal_pinjam').value);
-    let kondisi = document.getElementById('kondisi_buku').value;
+    const dendaInput = document.getElementById('denda');
+
+    if (!kembaliInput.value || !pinjam || !tempo) {
+        dendaInput.value = '';
+        return;
+    }
 
     let denda = 0;
 
     if (kembali < pinjam) {
-        alert("Tanggal kembali tidak boleh sebelum tanggal pinjam!");
-        kembaliInput.value = "";
-        document.getElementById('denda').value = "";
+        alert('Tanggal kembali tidak boleh sebelum tanggal pinjam!');
+        kembaliInput.value = '';
+        dendaInput.value = '';
         return;
     }
 
     if (kembali > tempo) {
-        let selisih = (kembali - tempo) / (1000 * 60 * 60 * 24);
+        const selisih = Math.ceil((kembali - tempo) / (1000 * 60 * 60 * 24));
         denda += selisih * 5000;
     }
 
-    if (kondisi == 'rusak') {
+    if (kondisi === 'rusak') {
         denda += 20000;
     }
 
-    if (kondisi == 'hilang') {
+    if (kondisi === 'hilang') {
         denda += 50000;
     }
 
-    document.getElementById('denda').value = denda;
+    dendaInput.value = denda;
 }
 
+document.getElementById('buku_id').addEventListener('change', updateTanggalPeminjaman);
 document.getElementById('tanggal_kembali').addEventListener('change', hitungDenda);
 document.getElementById('kondisi_buku').addEventListener('change', hitungDenda);
+
+document.addEventListener('DOMContentLoaded', function () {
+    updateTanggalPeminjaman();
+});
 </script>
 
 @endsection

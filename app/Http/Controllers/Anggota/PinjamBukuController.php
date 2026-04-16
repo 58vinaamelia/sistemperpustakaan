@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Anggota;
 
 use Illuminate\Http\Request;
 use App\Models\Anggota\Pinjambuku;
+use App\Models\Anggota\Pengembalian;
 use App\Models\Anggota\Buku;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -15,12 +16,17 @@ class PinjamBukuController extends \Illuminate\Routing\Controller
      */
     public function index()
     {
-        $peminjaman = Pinjambuku::with('buku')
+        $peminjaman = Pinjambuku::with(['buku', 'user'])
             ->where('user_id', Auth::id())
             ->latest()
             ->get();
 
-        return view('pages.anggota.peminjaman.index', compact('peminjaman'));
+        $pengembalian = Pengembalian::with(['buku', 'user'])
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->get();
+
+        return view('pages.anggota.peminjaman.index', compact('peminjaman', 'pengembalian'));
     }
 
     /**

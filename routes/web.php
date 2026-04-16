@@ -132,7 +132,10 @@ Route::prefix('petugas')->name('petugas.')->middleware('auth')->group(function()
     // =======================
     Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
     Route::post('/peminjaman/{id}/konfirmasi', [PeminjamanController::class, 'konfirmasi'])->name('peminjaman.konfirmasi');
+    Route::get('/peminjaman/{id}/tolak', [PeminjamanController::class, 'formTolak'])->name('peminjaman.tolak.form');
     Route::post('/peminjaman/{id}/tolak', [PeminjamanController::class, 'tolak'])->name('peminjaman.tolak');
+    Route::get('/peminjaman/{id}/kembalikan', [PeminjamanController::class, 'formKembalikan'])->name('peminjaman.kembalikan.form');
+    Route::post('/peminjaman/{id}/kembalikan', [PeminjamanController::class, 'kembalikan'])->name('peminjaman.kembalikan');
 
     // ✅ INI YANG TADI KURANG
     Route::delete('/peminjaman/{id}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');

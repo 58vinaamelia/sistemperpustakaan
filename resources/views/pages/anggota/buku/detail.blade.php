@@ -20,9 +20,12 @@
                 </button>
 
             @elseif($buku->stok > 0)
-                <a href="/anggota/buku/{{ $buku->id }}/pinjam" class="btn btn-success">
-                    Pinjam
-                </a>
+                <form action="{{ route('anggota.buku.pinjam.store', $buku->id) }}" method="POST" style="display:inline;">
+                    @csrf
+                    <button type="submit" class="btn btn-success">
+                        Pinjam
+                    </button>
+                </form>
 
             @else
                 <button class="btn btn-danger" disabled>

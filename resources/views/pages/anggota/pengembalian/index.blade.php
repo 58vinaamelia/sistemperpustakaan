@@ -4,12 +4,7 @@
 <div class="container mt-4">
 
     <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold m-0">Data Pengembalian Buku</h3>
-        <a href="{{ route('anggota.pengembalian.create') }}" class="btn btn-primary">
-            + Mengembalikan Buku
-        </a>
-    </div>
+
 
     <!-- CARD -->
     <div class="card shadow-sm">
@@ -18,7 +13,6 @@
             <table class="table table-bordered mb-0">
                 <thead style="background-color: #f1f1f1;">
                     <tr class="text-center">
-                        <th>Nama</th>
                         <th>Judul Buku</th>
                         <th>Tanggal Pinjam</th>
                         <th>Tanggal Kembali</th>
@@ -33,15 +27,13 @@
                     @forelse ($pengembalian as $data)
                         <tr class="text-center align-middle">
 
-                            <td>{{ $data->nama }}</td>
-
                             <td>{{ $data->buku->judul ?? '-' }}</td>
 
-                            <td>{{ $data->tanggal_pinjam }}</td>
+                            <td>{{ optional(\Carbon\Carbon::parse($data->tanggal_pinjam))->format('d-m-Y') ?? '-' }}</td>
 
-                            <td>{{ $data->tanggal_kembali }}</td>
+                            <td>{{ optional(\Carbon\Carbon::parse($data->tanggal_kembali))->format('d-m-Y') ?? '-' }}</td>
 
-                            <td>{{ $data->tanggal_jatuh_tempo }}</td>
+                            <td>{{ optional(\Carbon\Carbon::parse($data->tanggal_jatuh_tempo))->format('d-m-Y') ?? '-' }}</td>
 
                             <td>
                                 Rp {{ number_format($data->denda ?? 0, 0, ',', '.') }}
@@ -49,26 +41,25 @@
 
                             {{-- STATUS --}}
                             <td>
-                                @if($data->status == 'menunggu')
-                                    <span class="badge bg-warning text-dark">Menunggu</span>
-
-                                @elseif($data->status == 'diterima')
+                                @if($data->status == 'diterima')
                                     <span class="badge bg-success">Selesai</span>
-
+                                @elseif($data->status == 'menunggu')
+                                    <span class="badge bg-warning text-dark">Menunggu</span>
                                 @elseif($data->status == 'ditolak')
                                     <span class="badge bg-danger">Ditolak</span>
-
                                 @else
                                     <span class="badge bg-secondary">-</span>
                                 @endif
                             </td>
 
-                            {{-- 🔥 KONDISI BUKU (FIX DI SINI) --}}
+                            {{-- KONDISI BUKU --}}
                             <td>
-                                @if($data->kondisi_buku)
-                                    <span class="badge bg-info text-dark">
-                                        {{ ucfirst($data->kondisi_buku) }}
-                                    </span>
+                                @if($data->kondisi_buku == 'baik')
+                                    <span class="badge bg-success">Baik</span>
+                                @elseif($data->kondisi_buku == 'rusak')
+                                    <span class="badge bg-warning text-dark">Rusak</span>
+                                @elseif($data->kondisi_buku == 'hilang')
+                                    <span class="badge bg-danger">Hilang</span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
@@ -77,7 +68,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted">
+                            <td colspan="7" class="text-center text-muted">
                                 Tidak ada data
                             </td>
                         </tr>
