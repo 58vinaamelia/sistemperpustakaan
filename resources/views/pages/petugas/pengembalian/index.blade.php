@@ -55,6 +55,9 @@
                     @elseif($item->status == 'diterima')
                         <span class="badge bg-success">Selesai</span>
 
+                    @elseif($item->status == 'telat')
+                        <span class="badge bg-danger">Telat</span>
+
                     @elseif($item->status == 'ditolak')
                         <span class="badge bg-danger">Ditolak</span>
 
@@ -99,11 +102,11 @@
                         </div>
                     @endif
 
-                    {{-- SELESAI --}}
-                    @if($item->status == 'diterima')
+                    {{-- SELESAI / TELAT --}}
+                    @if($item->status == 'diterima' || $item->status == 'telat')
                         <div class="d-flex flex-column align-items-center gap-2">
 
-                            <span class="text-success fw-bold">Selesai</span>
+                            <span class="fw-bold {{ $item->status == 'telat' ? 'text-danger' : 'text-success' }}">{{ $item->status == 'telat' ? 'Telat' : 'Selesai' }}</span>
 
                             <a href="{{ route('petugas.pengembalian.struk', $item->id) }}"
                                class="btn btn-primary btn-sm">

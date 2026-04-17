@@ -135,6 +135,8 @@ class PeminjamanController extends Controller
 
         $tanggalKembali = Carbon::parse($request->tanggal_kembali);
         $denda = 0;
+        $statusPengembalian = 'selesai';
+        $statusPengembalianTabel = 'diterima';
 
         if ($pinjam->tanggal_jatuh_tempo) {
             $tanggalJatuhTempo = Carbon::parse($pinjam->tanggal_jatuh_tempo);
@@ -142,6 +144,8 @@ class PeminjamanController extends Controller
             if ($tanggalKembali->gt($tanggalJatuhTempo)) {
                 $hariTelat = $tanggalJatuhTempo->diffInDays($tanggalKembali);
                 $denda += $hariTelat * 1000;
+                $statusPengembalian = 'telat';
+                $statusPengembalianTabel = 'telat';
             }
         }
 
@@ -163,20 +167,8 @@ class PeminjamanController extends Controller
             'tanggal_kembali' => $tanggalKembali,
             'denda' => $denda,
             'kondisi_buku' => $request->kondisi_buku,
-            'status' => 'diterima',
+            'status' => $statusPengembalianTabel,
         ]);
-
-        $statusPengembalian = 'selesai';
-
-        if (!empty($pinjam->tanggal_jatuh_tempo)) {
-            $tanggalJatuhTempo = isset($tanggalJatuhTempo)
-                ? $tanggalJatuhTempo
-                : Carbon::parse($pinjam->tanggal_jatuh_tempo);
-
-            if ($tanggalKembali->gt($tanggalJatuhTempo)) {
-                $statusPengembalian = 'telat';
-            }
-        }
 
         $pinjam->update([
             'tanggal_kembali' => $tanggalKembali,
@@ -203,6 +195,8 @@ class PeminjamanController extends Controller
             $item->buku->increment('stok');
         }
 
+        $item->status = 'dihapus';
+        $item->save();
         $item->delete();
 
         return back()->with('success', 'Data peminjaman disembunyikan dari daftar, tetapi tetap tersimpan untuk laporan.');

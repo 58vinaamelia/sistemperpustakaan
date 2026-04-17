@@ -3,11 +3,14 @@
 namespace App\Models\Petugas;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\User;
 use App\Models\Petugas\Buku;
 
 class Pinjambuku extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'pinjambuku';
 
     protected $fillable = [
@@ -19,6 +22,10 @@ class Pinjambuku extends Model
         'tanggal_kembali',
         'status',
         'denda'
+    ];
+
+    protected $dates = [
+        'deleted_at'
     ];
 
     /**

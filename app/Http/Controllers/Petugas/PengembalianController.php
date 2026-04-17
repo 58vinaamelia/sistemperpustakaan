@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Petugas;
 
-use App\Http\Controllers\Controller;
 use App\Models\Petugas\Pengembalian;
 use App\Models\Petugas\Peminjaman;
 use App\Models\Anggota\Pinjambuku;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class PengembalianController extends \Illuminate\Routing\Controller
 {
@@ -32,7 +31,18 @@ class PengembalianController extends \Illuminate\Routing\Controller
         $tanggal = $pengembalian->tanggal_kembali;
 
         // ✅ STATUS PENGEMBALIAN
-        $pengembalian->status = 'diterima';
+        $statusPengembalian = 'diterima';
+
+        if ($pengembalian->tanggal_jatuh_tempo) {
+            $tanggalJatuhTempo = Carbon::parse($pengembalian->tanggal_jatuh_tempo);
+            $tanggalKembali = Carbon::parse($tanggal);
+
+            if ($tanggalKembali->gt($tanggalJatuhTempo)) {
+                $statusPengembalian = 'telat';
+            }
+        }
+
+        $pengembalian->status = $statusPengembalian;
         $pengembalian->save();
 
         // ==========================
@@ -42,7 +52,7 @@ class PengembalianController extends \Illuminate\Routing\Controller
             $peminjaman = Peminjaman::find($pengembalian->peminjaman_id);
 
             if ($peminjaman) {
-                $peminjaman->status = 'selesai';
+                $peminjaman->status = $statusPengembalian === 'telat' ? 'telat' : 'selesai';
                 $peminjaman->tanggal_kembali = $tanggal;
                 $peminjaman->save();
             }
@@ -56,7 +66,7 @@ class PengembalianController extends \Illuminate\Routing\Controller
             ->get();
 
         foreach ($pinjam as $p) {
-            $p->status = 'selesai'; // 🔥 samakan semua jadi selesai
+            $p->status = $statusPengembalian === 'telat' ? 'telat' : 'selesai';
             $p->tanggal_kembali = $tanggal;
             $p->save();
         }

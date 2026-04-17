@@ -17,10 +17,10 @@ class DashboardController extends Controller
         // TOTAL DATA
         $totalAnggota = User::where('role', 'anggota')->count();
         $totalBuku = Buku::count();
-        $totalDenda = Pinjambuku::sum('denda');
+        $totalDenda = Pinjambuku::withoutTrashed()->sum('denda');
 
         // QUERY DASAR
-        $query = Pinjambuku::with(['user', 'buku'])
+        $query = Pinjambuku::withoutTrashed()->with(['user', 'buku'])
             ->where('status', '<>', 'dihapus')
             ->when($search, function ($q, $search) {
                 $q->where(function ($sub) use ($search) {
